@@ -15,7 +15,7 @@ namespace FormulaEvaluatorTester
 
         private readonly static TestSet[] tests = new TestSet[] {BasicErrorTests};
 
-        private readonly static Dictionary<string, int> NOVARS;
+        private readonly static Dictionary<string, int> NOVARS = new Dictionary<string, int>();
 
         static void Main(string[] args)
         {
