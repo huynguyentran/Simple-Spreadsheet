@@ -5,7 +5,7 @@ using FormulaEvaluator;
 
 namespace FormulaEvaluatorTester
 {
-    class Tester
+    static class Tester
     {
         private delegate void TestSet();
 
@@ -13,25 +13,29 @@ namespace FormulaEvaluatorTester
 
         private static Dictionary<string, int> vars = new Dictionary<string, int>();
 
-        private readonly static TestSet[] tests;
+        private readonly static TestSet[] tests = new TestSet[] {BasicErrorTests};
+
+        private readonly static Dictionary<string, int> NOVARS;
 
         static void Main(string[] args)
         {
-            string input = "";
-            while (!input.Equals("quit"))
+            string input = Console.In.ReadLine(); ;
+            while (!input.Equals("quit") && !input.Equals("stop"))
             {
-                input = Console.In.ReadLine();
-
                 vars.Clear();
 
                 if (input.Length > 4 && input.Substring(0, 4).Equals("run "))
                 {
-                    tests[int.Parse(input.Substring(4, input.Length))]();
+                    int index = int.Parse(input.Substring(4, input.Length - 4));
+                    if (index >= 0 && index < tests.Length)
+                        tests[index]();
                 }
                 else
                 {
                     Console.WriteLine(Evaluator.Evaluate(input, AskVar));
                 }
+
+                input = Console.In.ReadLine();
             }
         }
 
@@ -41,7 +45,7 @@ namespace FormulaEvaluatorTester
             {
                 if (!vars.ContainsKey(var))
                 {
-                    Console.Out.WriteLine("What is the value of " + var + ".");
+                    Console.Out.WriteLine("What is the value of " + var + "?\n");
                     vars.Add(var, int.Parse(Console.In.ReadLine()));
                 }
 
@@ -64,11 +68,11 @@ namespace FormulaEvaluatorTester
             int solution = Evaluator.Evaluate(expression, HaveVar);
             if (solution == answer)
             {
-                Console.WriteLine("The Evaluator correctly solved the expression \"" + expression + "\" to be " + answer);
+                Console.WriteLine("The Evaluator correctly solved the expression \"" + expression + "\" to be " + answer + ".\n");
             }
             else
             {
-                Console.WriteLine("The Evaluator inccorrectly solved the expression \"" + expression + "\" to be " + solution + " instead of " + answer);
+                Console.WriteLine("The Evaluator inccorrectly solved the expression \"" + expression + "\" to be " + solution + " instead of " + answer + ".\n");
             }
         }
 
@@ -92,15 +96,21 @@ namespace FormulaEvaluatorTester
             }
             catch(E specificError)
             {
-                Console.Out.WriteLine("The Evaluator correctly encountered an error of type " + specificError.GetType() + " for expression \"" + expression + "\"");
+                Console.Out.WriteLine("The Evaluator correctly encountered an error of type " + specificError.GetType() + " for expression \"" + expression + "\".\n");
             }
             catch(Exception e)
             {
-                Console.Out.WriteLine("The Evaluator unexpectantly encountered an error of type " + e.GetType() + " for expression \"" + expression + "\"");
+                Console.Out.WriteLine("The Evaluator unexpectantly encountered an error of type " + e.GetType() + " for expression \"" + expression + "\".\n");
                 Console.Out.WriteLine(e.StackTrace);
             }
 
-            Console.Out.WriteLine("The Evaluator unexpectantly finished with a solution of " + solution + " for expression \"" + expression + "\"");
+            Console.Out.WriteLine("The Evaluator unexpectantly finished with a solution of " + solution + " for expression \"" + expression + "\".\n");
+        }
+
+        private static void BasicErrorTests()
+        {
+            ErrorTest<ArgumentException>("1 7 +", NOVARS);
+            ErrorTest<ArgumentException>("/ 3 6", NOVARS);
         }
     }
 }
