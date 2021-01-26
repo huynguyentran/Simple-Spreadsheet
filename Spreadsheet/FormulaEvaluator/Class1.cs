@@ -113,7 +113,7 @@ namespace FormulaEvaluator
             int i = 0;
             while (i < sequence.Length && Char.IsLetter(sequence[i++])) {}
 
-            return i > 0 && IsInteger(sequence, i);
+            return i > 0 && IsInteger(sequence, i - 1);
         }
 
         /// <summary>
