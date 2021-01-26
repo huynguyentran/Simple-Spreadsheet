@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace FormulaEvaluator
 {
@@ -35,7 +36,7 @@ namespace FormulaEvaluator
             { Value.Variable , IsVariable } };
 
         /// <summary>
-        /// Mapping value types to identification methods.
+        /// Mapping value types to conversion methods.
         /// </summary>
         private readonly static Dictionary<Value, Lookup> staticConverters = new Dictionary<Value, Lookup>() {
             { Value.Integer , int.Parse }};
@@ -45,6 +46,26 @@ namespace FormulaEvaluator
             Dictionary<Value, Lookup> dynamicConverters = new Dictionary<Value, Lookup>(staticConverters);
             dynamicConverters.Add(Value.Variable, variableEvaluator);
 
+            Stack<int> values = new Stack<int>();
+            Stack<string> operators = new Stack<string>();
+
+            foreach (string token in Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)"))
+            {
+                token.Trim();
+
+                if (IsValue(token, out Value valueType))
+                {
+                    values.Push(dynamicConverters[valueType](token));
+                }
+                else
+                {
+                    //TODO: add operators to opertators stack.
+                }
+
+                //TODO: throw an error for an invalid token.
+            }
+
+            //TODO: evaluate the expressions using the stacks as outlined in the spec. 
 
             return 0;
         }
