@@ -51,11 +51,11 @@ namespace FormulaEvaluator
 
             foreach (string token in Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)"))
             {
-                token.Trim();
+                string tokenTrimmed = token.Trim();
 
-                if (IsValue(token, out Value valueType))
+                if (IsValue(tokenTrimmed, out Value valueType))
                 {
-                    values.Push(dynamicConverters[valueType](token));
+                    values.Push(dynamicConverters[valueType](tokenTrimmed));
                 }
                 else
                 {
