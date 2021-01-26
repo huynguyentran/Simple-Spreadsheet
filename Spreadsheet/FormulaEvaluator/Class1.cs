@@ -4,6 +4,11 @@ namespace FormulaEvaluator
 {
     public static class Evaluator
     {
-        // TODO: Follow the PS1 instructions
+        public delegate int Lookup(String v);
+
+        public static int Evaluate(String exp, Lookup variableEvaluator)
+        {
+            return 0;
+        }
     }
 }
