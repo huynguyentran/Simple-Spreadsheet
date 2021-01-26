@@ -9,10 +9,10 @@ namespace FormulaEvaluator
     public static class Evaluator
     {
         /// <summary>
-        /// A function that searches for the value of a variable.
+        /// A method that searches for the integer representing a value.
         /// </summary>
-        /// <param name="v">The string representation of the variable.</param>
-        /// <returns>The integer that the variable references.</returns>
+        /// <param name="v">The string representation of the value.</param>
+        /// <returns>The integer that the value references.</returns>
         public delegate int Lookup(String v);
 
         /// <summary>
@@ -21,21 +21,31 @@ namespace FormulaEvaluator
         enum Value {Integer, Variable};
 
         /// <summary>
-        /// A function that tells whether a token fits its type.
+        /// A method that tells whether a token fits its type.
         /// </summary>
         /// <param name="token">The token to identify.</param>
         /// <returns>Whether the token is of the function's type.</returns>
         private delegate bool TokenIdentifier(String token);
 
         /// <summary>
-        /// Mapping value types to functions.
+        /// Mapping value types to identification methods.
         /// </summary>
         private readonly static Dictionary<Value, TokenIdentifier> identifiers = new Dictionary<Value, TokenIdentifier>() {
             { Value.Integer , IsInteger },
             { Value.Variable , IsVariable } };
 
+        /// <summary>
+        /// Mapping value types to identification methods.
+        /// </summary>
+        private readonly static Dictionary<Value, Lookup> staticConverters = new Dictionary<Value, Lookup>() {
+            { Value.Integer , int.Parse }};
+
         public static int Evaluate(String exp, Lookup variableEvaluator)
         {
+            Dictionary<Value, Lookup> dynamicConverters = new Dictionary<Value, Lookup>(staticConverters);
+            dynamicConverters.Add(Value.Variable, variableEvaluator);
+
+
             return 0;
         }
 
