@@ -32,7 +32,7 @@ namespace FormulaEvaluator
 
         public override bool IsOperator(string token)
         {
-            return token.Equals("+");
+            return "+".Equals(token);
         }
     }
 
@@ -45,7 +45,7 @@ namespace FormulaEvaluator
 
         public override bool IsOperator(string token)
         {
-            return token.Equals("-");
+            return "-".Equals(token);
         }
     }
 }
