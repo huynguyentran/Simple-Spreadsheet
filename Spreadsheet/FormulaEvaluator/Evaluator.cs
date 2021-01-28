@@ -29,57 +29,52 @@ namespace FormulaEvaluator
         private readonly static Dictionary<TokenIdentifier, Lookup> staticConverters = new Dictionary<TokenIdentifier, Lookup>() {
             { IsInteger , int.Parse }};
 
+        private readonly static Operator[] knownOperators = new Operator[] { new Plus(), new Minus(), new Times(), new Divide(), new LeftParenthesis(), new RightParenthesis() };
+
         public static int Evaluate(String exp, Lookup variableEvaluator)
         {
             Dictionary<TokenIdentifier, Lookup> dynamicConverters = new Dictionary<TokenIdentifier, Lookup>(staticConverters);
             dynamicConverters[IsVariable] = variableEvaluator;
 
             Stack<int> values = new Stack<int>();
-            Stack<string> operators = new Stack<string>();
+            Stack<Operator> operators = new Stack<Operator>();
 
             foreach (string token in Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)"))
             {
                 string tokenTrimmed = token.Trim();
 
-                if (TryParseValue(dynamicConverters, tokenTrimmed, out int intValue))
+                if (tokenTrimmed.Length > 0)
                 {
-                    if (operators.IsOnTop("*") || operators.IsOnTop("/"))
+                    if (TryParseValue(dynamicConverters, tokenTrimmed, out int intValue))
                     {
-                        if (values.Count == 0)
-                            throw new ArgumentException("Expected a value behind operator " + operators.Peek() + ", but got none.");
-                        intValue = DoOperations(values.Pop(), intValue, operators.Pop());
-                    }
+                        if (operators.IsOnTop<Operator, Multiplicative>())
+                        {
+                            if (values.TryPop(out int value1))
+                                intValue = operators.Pop().DoOperation(value1, intValue);
+                            else
+                                throw new ArgumentException("Expected a value behind operator " + operators.Peek() + ", but got none.");
+                        }
 
-                    values.Push(intValue);
-                }
-                else if (IsOperator(tokenTrimmed))
-                {
-                    if (tokenTrimmed.Equals("*") || tokenTrimmed.Equals("/"))
-                    {
-                        operators.Push(tokenTrimmed);
+                        values.Push(intValue);
                     }
-                    else if (tokenTrimmed.Equals("+") || tokenTrimmed.Equals("-"))
+                    else if (TryParseOperator(tokenTrimmed, out Operator objOperator))
                     {
-                        operators.Push(tokenTrimmed);
+                        objOperator.HandleStacks(values, operators);
                     }
-                    else if (tokenTrimmed.Equals("("))
+                    else
                     {
-                        operators.Push(tokenTrimmed);
+                        throw new ArgumentException("The token " + tokenTrimmed + " was not recognized.");
                     }
-                    else if (tokenTrimmed.Equals(")"))
-                    {
-                        
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("The token " + tokenTrimmed + " was not recognized.");
                 }
             }
 
-            //TODO: evaluate the expressions using the stacks as outlined in the spec. 
+            if (operators.Count == 1)
+                Operator.DoOperationIf<Additive>(values, operators);
 
-            return 0;
+            if (values.Count == 1 && operators.Count == 0)
+                return values.Pop();
+            else
+                throw new ArgumentException("Finished processing formula " + exp + " with excess operators or values.");
         }
 
         /// <summary>
@@ -145,6 +140,22 @@ namespace FormulaEvaluator
                 if (pair.Key(token))
                 {
                     conversion = pair.Value(token);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool TryParseOperator(string token, out Operator type)
+        {
+            type = null;
+
+            foreach(Operator op in knownOperators)
+            {
+                if (op.IsOperator(token))
+                {
+                    type = op;
                     return true;
                 }
             }
