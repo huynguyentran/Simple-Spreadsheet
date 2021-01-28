@@ -20,7 +20,7 @@ namespace FormulaEvaluatorTester
         static void Main(string[] args)
         {
             string input = Console.In.ReadLine(); ;
-            while (!input.Equals("quit") && !input.Equals("stop"))
+            while (!input.Equals("quit") && !input.Equals("stop") && !input.Equals(""))
             {
                 vars.Clear();
 
@@ -32,7 +32,14 @@ namespace FormulaEvaluatorTester
                 }
                 else
                 {
-                    Console.WriteLine(Evaluator.Evaluate(input, AskVar));
+                    try
+                    {
+                        Console.WriteLine(Evaluator.Evaluate(input, AskVar));
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine(e.StackTrace);
+                    }
                 }
 
                 input = Console.In.ReadLine();
