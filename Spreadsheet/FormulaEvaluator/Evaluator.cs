@@ -43,14 +43,38 @@ namespace FormulaEvaluator
 
                 if (TryParseValue(dynamicConverters, tokenTrimmed, out int intValue))
                 {
+                    if (operators.IsOnTop("*") || operators.IsOnTop("/"))
+                    {
+                        if (values.Count == 0)
+                            throw new ArgumentException("Expected a value behind operator " + operators.Peek() + ", but got none.");
+                        intValue = DoOperations(values.Pop(), intValue, operators.Pop());
+                    }
+
                     values.Push(intValue);
+                }
+                else if (IsOperator(tokenTrimmed))
+                {
+                    if (tokenTrimmed.Equals("*") || tokenTrimmed.Equals("/"))
+                    {
+                        operators.Push(tokenTrimmed);
+                    }
+                    else if (tokenTrimmed.Equals("+") || tokenTrimmed.Equals("-"))
+                    {
+                        operators.Push(tokenTrimmed);
+                    }
+                    else if (tokenTrimmed.Equals("("))
+                    {
+                        operators.Push(tokenTrimmed);
+                    }
+                    else if (tokenTrimmed.Equals(")"))
+                    {
+                        
+                    }
                 }
                 else
                 {
-                    //TODO: add operators to opertators stack.
+                    throw new ArgumentException("The token " + tokenTrimmed + " was not recognized.");
                 }
-
-                //TODO: throw an error for an invalid token.
             }
 
             //TODO: evaluate the expressions using the stacks as outlined in the spec. 
