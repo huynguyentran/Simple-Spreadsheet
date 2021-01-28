@@ -5,46 +5,34 @@ using System.Text.RegularExpressions;
 namespace FormulaEvaluator
 {
     /// <summary>
+    /// A method that searches for the integer representing a value.
+    /// </summary>
+    /// <param name="v">The string representation of the value.</param>
+    /// <returns>The integer that the value references.</returns>
+    public delegate int Lookup(String v);
+
+    /// <summary>
+    /// A method that tells whether a token fits its type.
+    /// </summary>
+    /// <param name="token">The token to identify.</param>
+    /// <returns>Whether the token is of the function's type.</returns>
+    public delegate bool TokenIdentifier(String token);
+
+    /// <summary>
     /// A class that evaluates the value of functions.
     /// </summary>
     public static class Evaluator
     {
         /// <summary>
-        /// A method that searches for the integer representing a value.
+        /// Mapping value identifiers to conversion methods (when both are known).
         /// </summary>
-        /// <param name="v">The string representation of the value.</param>
-        /// <returns>The integer that the value references.</returns>
-        public delegate int Lookup(String v);
-
-        /// <summary>
-        /// The different kinds of values that can be found in a function.
-        /// </summary>
-        enum Value {Integer, Variable};
-
-        /// <summary>
-        /// A method that tells whether a token fits its type.
-        /// </summary>
-        /// <param name="token">The token to identify.</param>
-        /// <returns>Whether the token is of the function's type.</returns>
-        private delegate bool TokenIdentifier(String token);
-
-        /// <summary>
-        /// Mapping value types to identification methods.
-        /// </summary>
-        private readonly static Dictionary<Value, TokenIdentifier> identifiers = new Dictionary<Value, TokenIdentifier>() {
-            { Value.Integer , IsInteger },
-            { Value.Variable , IsVariable } };
-
-        /// <summary>
-        /// Mapping value types to conversion methods.
-        /// </summary>
-        private readonly static Dictionary<Value, Lookup> staticConverters = new Dictionary<Value, Lookup>() {
-            { Value.Integer , int.Parse }};
+        private readonly static Dictionary<TokenIdentifier, Lookup> staticConverters = new Dictionary<TokenIdentifier, Lookup>() {
+            { IsInteger , int.Parse }};
 
         public static int Evaluate(String exp, Lookup variableEvaluator)
         {
-            Dictionary<Value, Lookup> dynamicConverters = new Dictionary<Value, Lookup>(staticConverters);
-            dynamicConverters.Add(Value.Variable, variableEvaluator);
+            Dictionary<TokenIdentifier, Lookup> dynamicConverters = new Dictionary<TokenIdentifier, Lookup>(staticConverters);
+            dynamicConverters[IsVariable] = variableEvaluator;
 
             Stack<int> values = new Stack<int>();
             Stack<string> operators = new Stack<string>();
@@ -53,9 +41,9 @@ namespace FormulaEvaluator
             {
                 string tokenTrimmed = token.Trim();
 
-                if (IsValue(tokenTrimmed, out Value valueType))
+                if (TryParseValue(dynamicConverters, tokenTrimmed, out int intValue))
                 {
-                    values.Push(dynamicConverters[valueType](tokenTrimmed));
+                    values.Push(intValue);
                 }
                 else
                 {
@@ -119,18 +107,20 @@ namespace FormulaEvaluator
         /// <summary>
         /// Determines whether a token is a value.
         /// </summary>
+        /// <param name="values">A mapping of methods to identify values to methods that
+        /// convert tokens into </param>
         /// <param name="token">The token to identify.</param>
-        /// <param name="value">What kind of value the token is.</param>
+        /// <param name="converter">The method to convert the token into an int.</param>
         /// <returns>Whether the token is a value.</returns>
-        private static bool IsValue(string token, out Value value)
+        private static bool TryParseValue(Dictionary<TokenIdentifier, Lookup> values, string token, out int conversion)
         {
-            value = Value.Integer;
+            conversion = 0;
 
-            foreach (KeyValuePair<Value, TokenIdentifier> pair in identifiers)
+            foreach (KeyValuePair<TokenIdentifier, Lookup> pair in values)
             {
-                if (pair.Value(token))
+                if (pair.Key(token))
                 {
-                    value = pair.Key;
+                    conversion = pair.Value(token);
                     return true;
                 }
             }
