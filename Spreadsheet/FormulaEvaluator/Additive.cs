@@ -22,4 +22,30 @@ namespace FormulaEvaluator
             operators.Push(this);
         }
     }
+
+    class Plus : Additive
+    {
+        override public int DoOperation (int operand1, int operand2)
+        {
+            return operand1 + operand2;
+        }
+
+        public override bool IsOperator(string token)
+        {
+            return token.Equals("+");
+        }
+    }
+
+    class Minus : Additive
+    {
+        override public int DoOperation(int operand1, int operand2)
+        {
+            return operand1 - operand2;
+        }
+
+        public override bool IsOperator(string token)
+        {
+            return token.Equals("-");
+        }
+    }
 }
