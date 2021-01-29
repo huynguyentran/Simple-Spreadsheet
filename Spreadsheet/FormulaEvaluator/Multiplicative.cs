@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FormulaEvaluator
 {
+    /// <summary>
+    /// The abstract representation of a multiplicative operator (*,/,^,etc.)
+    /// </summary>
     abstract class Multiplicative : Operator
     {
         public override int GetOperandCount()
@@ -12,6 +13,9 @@ namespace FormulaEvaluator
         }
     }
 
+    /// <summary>
+    /// A multiplication operator "*".
+    /// </summary>
     class Times : Multiplicative
     {
         public override int DoOperation(int[] operands)
@@ -26,6 +30,9 @@ namespace FormulaEvaluator
         }
     }
 
+    /// <summary>
+    /// A division operator "/".
+    /// </summary>
     class Divide : Multiplicative
     {
         public override int DoOperation(int[] operands)

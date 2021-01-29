@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace FormulaEvaluator
 {
+    /// <summary>
+    /// The abstract representation of a parentheses.
+    /// </summary>
     abstract class Parenthetical : Operator
     {
         public override int DoOperation(int[] operands)
@@ -18,6 +20,9 @@ namespace FormulaEvaluator
         }
     }
 
+    /// <summary>
+    /// A left parenthesis "(".
+    /// </summary>
     class LeftParenthesis : Parenthetical
     {
         public override string ToString()
@@ -26,6 +31,9 @@ namespace FormulaEvaluator
         }
     }
 
+    /// <summary>
+    /// A right parenthesis ")".
+    /// </summary>
     class RightParenthesis : Parenthetical
     {
         public override string ToString()
@@ -33,6 +41,11 @@ namespace FormulaEvaluator
             return ")";
         }
 
+        /// <summary>
+        /// A right parenthesis looks for its partner left parenthesis in the operators stack.
+        /// </summary>
+        /// <param name="values">The integer values processed thus far by the FunctionEvaluator.</param>
+        /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
         public override void HandleStacks(Stack<int> values, Stack<Operator> operators)
         {
             DoOperationIf<Additive>(values, operators);
