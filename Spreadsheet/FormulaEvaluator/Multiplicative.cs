@@ -6,34 +6,41 @@ namespace FormulaEvaluator
 {
     abstract class Multiplicative : Operator
     {
+        public override int GetOperandCount()
+        {
+            return 2;
+        }
     }
 
     class Times : Multiplicative
     {
-        public override int DoOperation(int v1, int v2)
+        public override int DoOperation(int[] operands)
         {
-            return v1 * v2;
+            base.DoOperation(operands);
+            return operands[0] * operands[1];
         }
 
-        public override bool IsOperator(string token)
+        public override string ToString()
         {
-            return "*".Equals(token);
+            return "*";
         }
     }
 
     class Divide : Multiplicative
     {
-        public override int DoOperation(int v1, int v2)
+        public override int DoOperation(int[] operands)
         {
-            if (v2 == 0)
-                throw new ArgumentException("Recieved the arguments " + v1 + " / " + v2 + " for division; cannot divide by zero.");
+            base.DoOperation(operands);
+
+            if (operands[1] == 0)
+                throw new ArgumentException("Recieved the arguments " + operands[0] + " / " + operands[1] + " for division; cannot divide by zero.");
             
-            return v1 / v2;
+            return operands[0] / operands[1];
         }
 
-        public override bool IsOperator(string token)
+        public override string ToString()
         {
-            return "/".Equals(token);
+            return "/";
         }
     }
 }

@@ -50,7 +50,7 @@ namespace FormulaEvaluator
                         if (operators.IsOnTop<Operator, Multiplicative>())
                         {
                             if (values.TryPop(out int value1))
-                                intValue = operators.Pop().DoOperation(value1, intValue);
+                                intValue = operators.Pop().DoOperation(new int[] { value1, intValue });
                             else
                                 throw new ArgumentException("Expected a value behind operator " + operators.Peek() + ", but got none.");
                         }

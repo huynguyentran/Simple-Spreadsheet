@@ -6,9 +6,21 @@ namespace FormulaEvaluator
 {
     abstract class Operator
     {
-        public abstract bool IsOperator(string token);
+        public virtual bool IsOperator(string token)
+        {
+            return ToString().Equals(token);
+        }
 
-        public abstract int DoOperation(int v1, int v2);
+        public virtual int DoOperation(int[] operands)
+        {
+            if (operands.Length != GetOperandCount())
+                throw new ArgumentException("Operator " + this + " takes " + GetOperandCount() + " operands, but got " + operands.Length + ".");
+            return 1;
+        }
+
+        public override abstract string ToString();
+
+        public abstract int GetOperandCount();
 
         public virtual void HandleStacks(Stack<int> values, Stack<Operator> operators)
         {
@@ -17,8 +29,8 @@ namespace FormulaEvaluator
 
         public static void DoOperationWith(Stack<int> values, Operator op)
         {
-            if (values.TryPops(2, out int[] operands))
-                values.Push(op.DoOperation(operands[1], operands[0]));
+            if (values.TryPops(op.GetOperandCount(), out int[] operands))
+                values.Push(op.DoOperation(operands));
             else
                 throw new ArgumentException("Tried to perform operation, but operands were missing.");
         }

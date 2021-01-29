@@ -27,7 +27,7 @@ namespace FormulaEvaluator
         public static bool TryPops<T>(this Stack<T> s, int times, out T[] items)
         {
             items = new T[times];
-            for (int i = 0; i < times; i++)
+            for (int i = times - 1; i >= 0; i--)
             {
                 if (s.TryPop(out T item))
                     items[i] = item;

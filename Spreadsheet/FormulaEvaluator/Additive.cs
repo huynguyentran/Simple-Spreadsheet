@@ -11,31 +11,38 @@ namespace FormulaEvaluator
             DoOperationIf<Additive>(values, operators);
             operators.Push(this);
         }
+
+        public override int GetOperandCount()
+        {
+            return 2;
+        }
     }
 
     class Plus : Additive
     {
-        override public int DoOperation (int operand1, int operand2)
+        override public int DoOperation (int[] operands)
         {
-            return operand1 + operand2;
+            base.DoOperation(operands);
+            return operands[0] + operands[1];
         }
 
-        public override bool IsOperator(string token)
+        public override string ToString()
         {
-            return "+".Equals(token);
+            return "+";
         }
     }
 
     class Minus : Additive
     {
-        override public int DoOperation(int operand1, int operand2)
+        override public int DoOperation(int[] operands)
         {
-            return operand1 - operand2;
+            base.DoOperation(operands);
+            return operands[0] - operands[1];
         }
 
-        public override bool IsOperator(string token)
+        public override string ToString()
         {
-            return "-".Equals(token);
+            return "-";
         }
     }
 }

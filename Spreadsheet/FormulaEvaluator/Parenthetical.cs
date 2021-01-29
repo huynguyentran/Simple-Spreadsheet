@@ -6,31 +6,31 @@ namespace FormulaEvaluator
 {
     abstract class Parenthetical : Operator
     {
+        public override int DoOperation(int[] operands)
+        {
+            base.DoOperation(operands);
+            throw new NotImplementedException();
+        }
+
+        public override int GetOperandCount()
+        {
+            return 0;
+        }
     }
 
     class LeftParenthesis : Parenthetical
     {
-        public override int DoOperation(int v1, int v2)
+        public override string ToString()
         {
-            throw new NotImplementedException();
-        }
-
-        public override bool IsOperator(string token)
-        {
-            return "(".Equals(token);
+            return "(";
         }
     }
 
     class RightParenthesis : Parenthetical
     {
-        public override int DoOperation(int v1, int v2)
+        public override string ToString()
         {
-            throw new NotImplementedException();
-        }
-
-        public override bool IsOperator(string token)
-        {
-            return ")".Equals(token);
+            return ")";
         }
 
         public override void HandleStacks(Stack<int> values, Stack<Operator> operators)
