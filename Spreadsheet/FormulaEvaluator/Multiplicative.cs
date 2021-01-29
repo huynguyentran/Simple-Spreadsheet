@@ -25,6 +25,9 @@ namespace FormulaEvaluator
     {
         public override int DoOperation(int v1, int v2)
         {
+            if (v2 == 0)
+                throw new ArgumentException("Recieved the arguments " + v1 + " / " + v2 + " for division; cannot divide by zero.");
+            
             return v1 / v2;
         }
 

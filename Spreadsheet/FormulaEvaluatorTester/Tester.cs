@@ -13,7 +13,7 @@ namespace FormulaEvaluatorTester
 
         private static Dictionary<string, int> vars = new Dictionary<string, int>();
 
-        private readonly static TestSet[] tests = new TestSet[] {BasicErrorTests, BasicArithmetic, Parentheses, Variables};
+        private readonly static TestSet[] tests = new TestSet[] { SyntaxErrorTests, BasicArithmetic, Parentheses, Variables};
 
         private readonly static Dictionary<string, int> NOVARS = new Dictionary<string, int>();
 
@@ -113,20 +113,24 @@ namespace FormulaEvaluatorTester
             }
             catch(E specificError)
             {
-                Console.Out.WriteLine("The Evaluator correctly encountered an error of type " + specificError.GetType() + " for expression \"" + expression + "\".\n");
+                Console.Out.WriteLine("The Evaluator correctly encountered an error of type " + specificError.GetType() + " for expression \"" + expression + "\":\n");
+                Console.Out.WriteLine(specificError.Message + "\n");
             }
             catch(Exception e)
             {
                 Console.Out.WriteLine("The Evaluator unexpectantly encountered an error of type " + e.GetType() + " for expression \"" + expression + "\".\n");
+                Console.Out.WriteLine(e.Message + "\n");
                 Console.Out.WriteLine(e.StackTrace);
             }
         }
 
-        private static void BasicErrorTests()
+        private static void SyntaxErrorTests()
         {
             ErrorTest<ArgumentException>("1 7 +", NOVARS);
             ErrorTest<ArgumentException>("/ 3 6", NOVARS);
             ErrorTest<ArgumentException>("-3", NOVARS);
+            ErrorTest<ArgumentException>("/ 32", NOVARS);
+            ErrorTest<ArgumentException>("7 +", NOVARS);
         }
 
         private static void BasicArithmetic()
@@ -141,6 +145,9 @@ namespace FormulaEvaluatorTester
                 dictionaries[e] = NOVARS;
 
             CheckTests(expressions, dictionaries, answers);
+
+            ErrorTest<ArgumentException>("3 / 0", NOVARS);
+            ErrorTest<ArgumentException>("(8 + 5) / (9 *(8/2 - 4))", NOVARS);
         }
 
         private static void Parentheses()

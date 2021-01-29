@@ -74,7 +74,7 @@ namespace FormulaEvaluator
             if (values.Count == 1 && operators.Count == 0)
                 return values.Pop();
             else
-                throw new ArgumentException("Finished processing formula " + exp + " with excess operators or values.");
+                throw new ArgumentException("Finished processing formula " + exp + " with excess operators or values. Is a left parenthesis missing a right pair?");
         }
 
         /// <summary>
