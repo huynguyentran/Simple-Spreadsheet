@@ -13,22 +13,31 @@ namespace FormulaEvaluatorTester
 
         private static Dictionary<string, int> vars = new Dictionary<string, int>();
 
-        private readonly static TestSet[] tests = new TestSet[] {BasicErrorTests};
+        private readonly static TestSet[] tests = new TestSet[] {BasicErrorTests, BasicArithmetic, Parentheses, Variables};
 
         private readonly static Dictionary<string, int> NOVARS = new Dictionary<string, int>();
 
         static void Main(string[] args)
         {
             string input = Console.In.ReadLine(); ;
-            while (!input.Equals("quit") && !input.Equals("stop") && !input.Equals(""))
+            while (!input.Equals("quit") && !input.Equals("stop"))
             {
                 vars.Clear();
 
                 if (input.Length > 4 && input.Substring(0, 4).Equals("run "))
                 {
-                    int index = int.Parse(input.Substring(4, input.Length - 4));
-                    if (index >= 0 && index < tests.Length)
-                        tests[index]();
+                    string rest = input.Substring(4, input.Length - 4).Trim();
+                    if (!rest.Equals("all"))
+                    {
+                        int index = int.Parse(rest);
+                        if (index >= 0 && index < tests.Length)
+                            tests[index]();
+                    }
+                    else
+                    {
+                        foreach (TestSet t in tests)
+                            t();
+                    }
                 }
                 else
                 {
@@ -79,7 +88,7 @@ namespace FormulaEvaluatorTester
             }
             else
             {
-                Console.WriteLine("The Evaluator inccorrectly solved the expression \"" + expression + "\" to be " + solution + " instead of " + answer + ".\n");
+                Console.WriteLine("The Evaluator incorrectly solved the expression \"" + expression + "\" to be " + solution + " instead of " + answer + ".\n");
             }
         }
 
@@ -99,7 +108,8 @@ namespace FormulaEvaluatorTester
             int solution = -1;
             try
             {
-                solution = Evaluator.Evaluate(expression, HaveVar); ;
+                solution = Evaluator.Evaluate(expression, HaveVar);
+                Console.Out.WriteLine("The Evaluator unexpectantly finished with a solution of " + solution + " for expression \"" + expression + "\".\n");
             }
             catch(E specificError)
             {
@@ -110,14 +120,48 @@ namespace FormulaEvaluatorTester
                 Console.Out.WriteLine("The Evaluator unexpectantly encountered an error of type " + e.GetType() + " for expression \"" + expression + "\".\n");
                 Console.Out.WriteLine(e.StackTrace);
             }
-
-            Console.Out.WriteLine("The Evaluator unexpectantly finished with a solution of " + solution + " for expression \"" + expression + "\".\n");
         }
 
         private static void BasicErrorTests()
         {
             ErrorTest<ArgumentException>("1 7 +", NOVARS);
             ErrorTest<ArgumentException>("/ 3 6", NOVARS);
+            ErrorTest<ArgumentException>("-3", NOVARS);
+        }
+
+        private static void BasicArithmetic()
+        {
+            int i = 5;
+
+            string[] expressions = new string[] { "1+2", "3 * 2", "7/ 4", "2-4", "3 + 7 + 9"};
+            Dictionary<string, int>[] dictionaries = new Dictionary<string, int>[i];
+            int[] answers = new int[] { 3, 6, 1, -2, 19 };
+
+            for (int e = 0; e < i; e++)
+                dictionaries[e] = NOVARS;
+
+            CheckTests(expressions, dictionaries, answers);
+        }
+
+        private static void Parentheses()
+        {
+            ErrorTest<ArgumentException>("3 + ( 9 - 2", NOVARS);
+            ErrorTest<ArgumentException>("3 + (9 - 2 ))", NOVARS);
+            ErrorTest<ArgumentException>("3 + (9 - 2) * ((3 - 7) * (12)", NOVARS);
+
+            CheckTest("3 * (4 + 2)", NOVARS, 18);
+            CheckTest("3 + (7 - 9) * ((6 - 7) * (12))", NOVARS, 27);
+        }
+
+        private static void Variables()
+        {
+            ErrorTest<ArgumentException>("1 + A", NOVARS);
+            ErrorTest<ArgumentException>("2 + AAB3A * 3", NOVARS);
+            ErrorTest<ArgumentException>("GT", NOVARS);
+            ErrorTest<ArgumentException>("2* (0 + 7A)", NOVARS);
+
+            CheckTest("3 + A1", new Dictionary<string, int>() { { "A1", 2 } }, 5);
+            CheckTest("3*(BBC456) - C66", new Dictionary<string, int>() { { "BBC456", 2 }, {"C66", 2} }, 4);
         }
     }
 }
