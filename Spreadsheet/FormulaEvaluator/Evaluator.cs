@@ -26,15 +26,15 @@ namespace FormulaEvaluator
         /// <summary>
         /// Mapping value identifiers to conversion methods (when both are known).
         /// </summary>
-        private readonly static Dictionary<TokenIdentifier, Lookup> staticConverters = new Dictionary<TokenIdentifier, Lookup>() {
-            { IsInteger , int.Parse }};
+        private readonly static Dictionary<Regex, Lookup> staticConverters = new Dictionary<Regex, Lookup>() {
+            { new Regex(@"^\d+$") , int.Parse }};
 
         private readonly static Operator[] knownOperators = new Operator[] { new Plus(), new Minus(), new Times(), new Divide(), new LeftParenthesis(), new RightParenthesis() };
 
         public static int Evaluate(String exp, Lookup variableEvaluator)
         {
-            Dictionary<TokenIdentifier, Lookup> dynamicConverters = new Dictionary<TokenIdentifier, Lookup>(staticConverters);
-            dynamicConverters[IsVariable] = variableEvaluator;
+            Dictionary<Regex, Lookup> dynamicConverters = new Dictionary<Regex, Lookup>(staticConverters);
+            dynamicConverters[new Regex(@"^([a-zA-Z]+)(\d+)$")] = variableEvaluator;
 
             Stack<int> values = new Stack<int>();
             Stack<Operator> operators = new Stack<Operator>();
@@ -45,17 +45,17 @@ namespace FormulaEvaluator
 
                 if (tokenTrimmed.Length > 0)
                 {
-                    if (TryParseValue(dynamicConverters, tokenTrimmed, out int intValue))
+                    if (TryParseValue(dynamicConverters, tokenTrimmed, out int valueRight))
                     {
                         if (operators.IsOnTop<Operator, Multiplicative>())
                         {
-                            if (values.TryPop(out int value1))
-                                intValue = operators.Pop().DoOperation(new int[] { value1, intValue });
+                            if (values.TryPop(out int valueLeft))
+                                valueRight = operators.Pop().DoOperation(new int[] { valueLeft, valueRight });
                             else
                                 throw new ArgumentException("Expected a value behind operator " + operators.Peek() + ", but got none.");
                         }
 
-                        values.Push(intValue);
+                        values.Push(valueRight);
                     }
                     else if (TryParseOperator(tokenTrimmed, out Operator objOperator))
                     {
@@ -78,52 +78,6 @@ namespace FormulaEvaluator
         }
 
         /// <summary>
-        /// Determines if a portion of a function token is an integer.
-        /// </summary>
-        /// <param name="sequence">The token.</param>
-        /// <param name="startIndex">The index from which to start reading the token.</param>
-        /// <returns>Whether the read portion of the token was an integer.</returns>
-        private static bool IsInteger(String sequence, int startIndex)
-        {
-            if (startIndex > sequence.Length || startIndex < 0)
-                throw new IndexOutOfRangeException("A number was asked to be identified from an index that did not exist within the length of the sequence to check.");
-            else if (startIndex == sequence.Length)
-                return false;
-
-            while (startIndex < sequence.Length)
-                if (!Char.IsNumber(sequence[startIndex++]))
-                    return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// Determines if a token is an integer.
-        /// </summary>
-        /// <param name="sequence">The token.</param>
-        /// <returns>Whether the token was an integer.</returns>
-        private static bool IsInteger(String sequence)
-        {
-            return IsInteger(sequence, 0);
-        }
-
-        /// <summary>
-        /// Determines if a token is a variable.
-        /// </summary>
-        /// <param name="sequence">The token.</param>
-        /// <returns>Whether the token is a vairiable.</returns>
-        private static bool IsVariable (String sequence)
-        {
-            if (sequence.Length < 2)
-                return false;
-
-            int i = 0;
-            while (i < sequence.Length && Char.IsLetter(sequence[i++])) {}
-            i--;
-            return i > 0 && IsInteger(sequence, i);
-        }
-
-        /// <summary>
         /// Determines whether a token is a value.
         /// </summary>
         /// <param name="values">A mapping of methods to identify values to methods that
@@ -131,13 +85,13 @@ namespace FormulaEvaluator
         /// <param name="token">The token to identify.</param>
         /// <param name="converter">The method to convert the token into an int.</param>
         /// <returns>Whether the token is a value.</returns>
-        private static bool TryParseValue(Dictionary<TokenIdentifier, Lookup> values, string token, out int conversion)
+        private static bool TryParseValue(Dictionary<Regex, Lookup> values, string token, out int conversion)
         {
             conversion = 0;
 
-            foreach (KeyValuePair<TokenIdentifier, Lookup> pair in values)
+            foreach (KeyValuePair<Regex, Lookup> pair in values)
             {
-                if (pair.Key(token))
+                if (pair.Key.IsMatch(token))
                 {
                     conversion = pair.Value(token);
                     return true;
