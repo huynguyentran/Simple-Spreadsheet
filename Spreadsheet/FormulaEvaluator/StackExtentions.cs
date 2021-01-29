@@ -3,7 +3,7 @@
 namespace FormulaEvaluator
 {
     /// <summary>
-    /// A class that holdes a few stack extentions.
+    /// A class that holds a few stack extentions.
     /// </summary>
     static class StackExtentions
     {
