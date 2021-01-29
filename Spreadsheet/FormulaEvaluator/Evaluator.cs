@@ -34,7 +34,7 @@ namespace FormulaEvaluator
         public static int Evaluate(String exp, Lookup variableEvaluator)
         {
             Dictionary<Regex, Lookup> dynamicConverters = new Dictionary<Regex, Lookup>(staticConverters);
-            dynamicConverters[new Regex(@"^([a-zA-Z]+)(\d+)$")] = variableEvaluator;
+            dynamicConverters[new Regex(@"^[a-zA-Z]+\d+$")] = variableEvaluator;
 
             Stack<int> values = new Stack<int>();
             Stack<Operator> operators = new Stack<Operator>();
