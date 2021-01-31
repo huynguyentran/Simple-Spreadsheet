@@ -148,7 +148,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            return nodes[s].GetDependents();
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            return nodes[s].GetDependees();
         }
 
 
@@ -174,6 +174,9 @@ namespace SpreadsheetUtilities
         {
             Node nodeS = AddNode(s);
             Node nodeT = AddNode(t);
+
+            nodeS.AddDependent(t);
+            nodeT.AddDependee(s);
         }
 
         private Node AddNode(string name)
@@ -196,6 +199,8 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
+            nodes[s].RemoveDependent(t);
+            nodes[t].RemoveDependee(s);
         }
 
 
@@ -205,6 +210,18 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            Node nodeS = nodes[s];
+            foreach (string oldDependent in nodeS.GetDependents())
+            {
+                nodes[oldDependent].RemoveDependee(s);
+            }
+            nodeS.GetDependents().Clear();
+
+            foreach (string newDependent in newDependents)
+            {
+                nodeS.AddDependent(s);
+                AddNode(newDependent).AddDependee(s);
+            }
         }
 
 
@@ -214,6 +231,18 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            Node nodeS = nodes[s];
+            foreach (string oldDependee in nodeS.GetDependees())
+            {
+                nodes[oldDependee].RemoveDependent(s);
+            }
+            nodeS.GetDependees().Clear();
+
+            foreach (string newDependee in newDependees)
+            {
+                nodeS.AddDependee(s);
+                AddNode(newDependee).AddDependent(s);
+            }
         }
 
     }
