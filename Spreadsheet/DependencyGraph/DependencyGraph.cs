@@ -93,6 +93,7 @@ namespace SpreadsheetUtilities
         }
 
         private Dictionary<string, Node> nodes;
+        private int pairCount = 0;
 
         /// <summary>
         /// Creates an empty DependencyGraph.
@@ -108,7 +109,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get { return nodes.Count; }
+            get { return pairCount; }
         }
 
 
@@ -175,8 +176,8 @@ namespace SpreadsheetUtilities
             Node nodeS = AddNode(s);
             Node nodeT = AddNode(t);
 
-            nodeS.AddDependent(t);
-            nodeT.AddDependee(s);
+            if (nodeS.AddDependent(t) && nodeT.AddDependee(s))
+                pairCount++;
         }
 
         private Node AddNode(string name)
@@ -199,8 +200,8 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
-            nodes[s].RemoveDependent(t);
-            nodes[t].RemoveDependee(s);
+            if (nodes[s].RemoveDependent(t) && nodes[t].RemoveDependee(s))
+                pairCount--;
         }
 
 
@@ -211,6 +212,7 @@ namespace SpreadsheetUtilities
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
             Node nodeS = nodes[s];
+            pairCount -= nodeS.GetDependents().Count;
             foreach (string oldDependent in nodeS.GetDependents())
             {
                 nodes[oldDependent].RemoveDependee(s);
@@ -219,8 +221,7 @@ namespace SpreadsheetUtilities
 
             foreach (string newDependent in newDependents)
             {
-                nodeS.AddDependent(s);
-                AddNode(newDependent).AddDependee(s);
+                AddDependency(s, newDependent);
             }
         }
 
@@ -232,6 +233,7 @@ namespace SpreadsheetUtilities
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
             Node nodeS = nodes[s];
+            pairCount -= nodeS.GetDependees().Count;
             foreach (string oldDependee in nodeS.GetDependees())
             {
                 nodes[oldDependee].RemoveDependent(s);
@@ -240,8 +242,7 @@ namespace SpreadsheetUtilities
 
             foreach (string newDependee in newDependees)
             {
-                nodeS.AddDependee(s);
-                AddNode(newDependee).AddDependent(s);
+                AddDependency(newDependee, s);
             }
         }
 
