@@ -41,11 +41,60 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
+
+        private class Node
+        {
+            private HashSet<Node> dependents;
+            private HashSet<Node> dependees;
+            private string name;
+
+            public Node (string n)
+            {
+                name = n;
+                dependents = new HashSet<Node>();
+                dependees = new HashSet<Node>();
+            }
+
+            public bool AddDependent (Node dependent)
+            {
+                if (dependents.Add(dependent))
+                {
+                    dependent.dependees.Add(this);
+                    return true;
+                }
+                return false;
+            }
+
+            public bool RemoveDependent (Node dependent)
+            {
+                if (dependents.Remove(dependent))
+                {
+                    dependent.dependees.Remove(this);
+                    return true;
+                }
+                return false;
+            }
+
+            public HashSet<Node> GetDependents()
+            {
+                return dependents;
+            }
+
+            public HashSet<Node> GetDependees()
+            {
+                return dependees;
+            }
+            
+        }
+
+        private Dictionary<string, Node> nodes;
+
         /// <summary>
         /// Creates an empty DependencyGraph.
         /// </summary>
         public DependencyGraph()
         {
+            nodes = new Dictionary<string, Node>();
         }
 
 
