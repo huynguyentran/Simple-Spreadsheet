@@ -44,43 +44,48 @@ namespace SpreadsheetUtilities
 
         private class Node
         {
-            private HashSet<Node> dependents;
-            private HashSet<Node> dependees;
+            private HashSet<string> dependents;
+            private HashSet<string> dependees;
             private string name;
 
             public Node (string n)
             {
                 name = n;
-                dependents = new HashSet<Node>();
-                dependees = new HashSet<Node>();
+                dependents = new HashSet<string>();
+                dependees = new HashSet<string>();
             }
 
-            public bool AddDependent (Node dependent)
+            public bool AddDependent (string dependent)
             {
-                if (dependents.Add(dependent))
-                {
-                    dependent.dependees.Add(this);
-                    return true;
-                }
-                return false;
+                return dependents.Add(dependent);
             }
 
-            public bool RemoveDependent (Node dependent)
+            public bool RemoveDependent (string dependent)
             {
-                if (dependents.Remove(dependent))
-                {
-                    dependent.dependees.Remove(this);
-                    return true;
-                }
-                return false;
+                return dependents.Remove(dependent);
             }
 
-            public HashSet<Node> GetDependents()
+            public bool AddDependee (string dependee)
+            {
+                return dependees.Add(dependee);
+            }
+
+            public bool RemoveDependee (string dependee)
+            {
+                return dependees.Remove(dependee);
+            }
+
+            public override string ToString()
+            {
+                return name;
+            }
+
+            public HashSet<string> GetDependents()
             {
                 return dependents;
             }
 
-            public HashSet<Node> GetDependees()
+            public HashSet<string> GetDependees()
             {
                 return dependees;
             }
@@ -103,7 +108,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            get { return nodes.Count; }
         }
 
 
@@ -116,7 +121,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return 0; }
+            get { return nodes[s].GetDependees().Count; }
         }
 
 
@@ -125,7 +130,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            return false;
+            return nodes[s].GetDependents().Count == 0;
         }
 
 
@@ -134,7 +139,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
-            return false;
+            return nodes[s].GetDependees().Count == 0;
         }
 
 
@@ -167,6 +172,20 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
+            Node nodeS = AddNode(s);
+            Node nodeT = AddNode(t);
+        }
+
+        private Node AddNode(string name)
+        {
+            if (! nodes.ContainsKey(name))
+            {
+                Node node = new Node(name);
+                nodes[name] = node;
+                return node;
+            }
+
+            return nodes[name];
         }
 
 
