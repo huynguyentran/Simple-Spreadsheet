@@ -41,9 +41,17 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
-
+        /// <summary>
+        /// A mapping of strings to their dependents.
+        /// </summary>
         private Dictionary<string, HashSet<string>> dependents;
+        /// <summary>
+        /// A mapping of strings to their dependees.
+        /// </summary>
         private Dictionary<string, HashSet<string>> dependees;
+        /// <summary>
+        /// A 
+        /// </summary>
         private int pairCount = 0;
 
         /// <summary>
@@ -53,6 +61,7 @@ namespace SpreadsheetUtilities
         {
             dependents = new Dictionary<string, HashSet<string>>();
             dependees = new Dictionary<string, HashSet<string>>();
+            dependees.
         }
 
 
@@ -74,7 +83,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return dependents.ReturnIfNotIn(s, new HashSet<string>()).Count; }
+            get { return dependents.GetOrDefault(s, new HashSet<string>()).Count; }
         }
 
 
@@ -83,7 +92,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            return dependents.ReturnIfNotIn(s, new HashSet<string>()).Count == 0;
+            return dependents.GetOrDefault(s, new HashSet<string>()).Count == 0;
         }
 
 
@@ -92,7 +101,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
-            return dependees.ReturnIfNotIn(s, new HashSet<string>()).Count == 0;
+            return dependees.GetOrDefault(s, new HashSet<string>()).Count == 0;
         }
 
 
@@ -101,7 +110,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return dependents.ReturnIfNotIn(s, new HashSet<string>());
+            return dependents.GetOrDefault(s, new HashSet<string>());
         }
 
         /// <summary>
@@ -109,7 +118,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return dependees.ReturnIfNotIn(s, new HashSet<string>());
+            return dependees.GetOrDefault(s, new HashSet<string>());
         }
 
 
