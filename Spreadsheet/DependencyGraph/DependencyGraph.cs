@@ -61,7 +61,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get { return dependents.Count; }
+            get { return pairCount; }
         }
 
 
@@ -74,7 +74,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return dependees[s].Count; }
+            get { return dependents.ReturnIfNotIn(s, new HashSet<string>()).Count; }
         }
 
 
@@ -83,7 +83,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            return dependents[s].Count == 0;
+            return dependents.ReturnIfNotIn(s, new HashSet<string>()).Count == 0;
         }
 
 
@@ -92,7 +92,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
-            return dependees[s].Count == 0;
+            return dependees.ReturnIfNotIn(s, new HashSet<string>()).Count == 0;
         }
 
 
@@ -101,7 +101,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return dependents[s];
+            return dependents.ReturnIfNotIn(s, new HashSet<string>());
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return dependees[s];
+            return dependees.ReturnIfNotIn(s, new HashSet<string>());
         }
 
 

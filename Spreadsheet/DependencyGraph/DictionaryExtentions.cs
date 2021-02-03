@@ -13,5 +13,14 @@ namespace SpreadsheetUtilities
                 dict.Add(key, value);
             }
         }
+
+        public static V ReturnIfNotIn<K, V>(this Dictionary<K, V> dict, K key, V emergencyReturn)
+        {
+            if (dict.ContainsKey(key))
+            {
+                return dict[key];
+            }
+            return emergencyReturn;
+        }
     }
 }
