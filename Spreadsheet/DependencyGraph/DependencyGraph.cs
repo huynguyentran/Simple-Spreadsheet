@@ -42,57 +42,8 @@ namespace SpreadsheetUtilities
     public class DependencyGraph
     {
 
-        private class Node
-        {
-            private HashSet<string> dependents;
-            private HashSet<string> dependees;
-            private string name;
-
-            public Node (string n)
-            {
-                name = n;
-                dependents = new HashSet<string>();
-                dependees = new HashSet<string>();
-            }
-
-            public bool AddDependent (string dependent)
-            {
-                return dependents.Add(dependent);
-            }
-
-            public bool RemoveDependent (string dependent)
-            {
-                return dependents.Remove(dependent);
-            }
-
-            public bool AddDependee (string dependee)
-            {
-                return dependees.Add(dependee);
-            }
-
-            public bool RemoveDependee (string dependee)
-            {
-                return dependees.Remove(dependee);
-            }
-
-            public override string ToString()
-            {
-                return name;
-            }
-
-            public HashSet<string> GetDependents()
-            {
-                return dependents;
-            }
-
-            public HashSet<string> GetDependees()
-            {
-                return dependees;
-            }
-            
-        }
-
-        private Dictionary<string, Node> nodes;
+        private Dictionary<string, HashSet<string>> dependents;
+        private Dictionary<string, HashSet<string>> dependees;
         private int pairCount = 0;
 
         /// <summary>
@@ -100,7 +51,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public DependencyGraph()
         {
-            nodes = new Dictionary<string, Node>();
+            dependents = new Dictionary<string, HashSet<string>>();
+            dependees = new Dictionary<string, HashSet<string>>();
         }
 
 
@@ -109,7 +61,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get { return pairCount; }
+            get { return dependents.Count; }
         }
 
 
@@ -122,7 +74,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return nodes[s].GetDependees().Count; }
+            get { return dependees[s].Count; }
         }
 
 
@@ -131,7 +83,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            return nodes[s].GetDependents().Count == 0;
+            return dependents[s].Count == 0;
         }
 
 
@@ -140,7 +92,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
-            return nodes[s].GetDependees().Count == 0;
+            return dependees[s].Count == 0;
         }
 
 
@@ -149,7 +101,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return nodes[s].GetDependents();
+            return dependents[s];
         }
 
         /// <summary>
@@ -157,7 +109,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return nodes[s].GetDependees();
+            return dependees[s];
         }
 
 
@@ -173,23 +125,11 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
-            Node nodeS = AddNode(s);
-            Node nodeT = AddNode(t);
+            dependents.AddIfNotIn(s, new HashSet<string>());
+            dependees.AddIfNotIn(t, new HashSet<string>());
 
-            if (nodeS.AddDependent(t) && nodeT.AddDependee(s))
+            if (dependents[s].Add(t) && dependees[t].Add(s))
                 pairCount++;
-        }
-
-        private Node AddNode(string name)
-        {
-            if (! nodes.ContainsKey(name))
-            {
-                Node node = new Node(name);
-                nodes[name] = node;
-                return node;
-            }
-
-            return nodes[name];
         }
 
 
@@ -200,7 +140,7 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
-            if (nodes[s].RemoveDependent(t) && nodes[t].RemoveDependee(s))
+            if (dependents[s].Remove(t) && dependees[t].Remove(s))
                 pairCount--;
         }
 
@@ -211,13 +151,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-            Node nodeS = nodes[s];
-            pairCount -= nodeS.GetDependents().Count;
-            foreach (string oldDependent in nodeS.GetDependents())
+            HashSet<string> sDependents = new HashSet<string>(dependents[s]);
+            foreach (string oldDependent in sDependents)
             {
-                nodes[oldDependent].RemoveDependee(s);
+                RemoveDependency(s, oldDependent);
             }
-            nodeS.GetDependents().Clear();
 
             foreach (string newDependent in newDependents)
             {
@@ -232,13 +170,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-            Node nodeS = nodes[s];
-            pairCount -= nodeS.GetDependees().Count;
-            foreach (string oldDependee in nodeS.GetDependees())
+            HashSet<string> sDependees = new HashSet<string>(dependees[s]);
+            foreach (string oldDependee in sDependees)
             {
-                nodes[oldDependee].RemoveDependent(s);
+                RemoveDependency(oldDependee, s);
             }
-            nodeS.GetDependees().Clear();
 
             foreach (string newDependee in newDependees)
             {
