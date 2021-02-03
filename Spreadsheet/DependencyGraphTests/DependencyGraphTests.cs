@@ -261,5 +261,13 @@ namespace DevelopmentTests
             }
         }
 
+        //William's Tests:
+        [TestMethod()]
+        [ExpectedException(typeof(ArgumentException))]
+        public void LeftNullTest()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency(null, "a");
+        }
     }
 }
