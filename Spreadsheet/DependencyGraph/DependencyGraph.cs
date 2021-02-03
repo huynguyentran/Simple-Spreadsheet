@@ -151,7 +151,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-            HashSet<string> sDependents = new HashSet<string>(dependents[s]);
+            HashSet<string> sDependents = new HashSet<string>(GetDependents(s));
             foreach (string oldDependent in sDependents)
             {
                 RemoveDependency(s, oldDependent);
@@ -170,7 +170,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-            HashSet<string> sDependees = new HashSet<string>(dependees[s]);
+            HashSet<string> sDependees = new HashSet<string>(GetDependees(s));
             foreach (string oldDependee in sDependees)
             {
                 RemoveDependency(oldDependee, s);
