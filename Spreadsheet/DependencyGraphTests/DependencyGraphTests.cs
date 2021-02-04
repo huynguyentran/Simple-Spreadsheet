@@ -262,5 +262,80 @@ namespace DevelopmentTests
         }
 
         //William's Tests:
+        [TestMethod]
+        public void EmptyDependentInfo()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            Assert.AreEqual(0, dg.Size);
+            Assert.AreEqual(0, dg["c"]);
+            Assert.IsFalse(dg.HasDependents("d"));
+            IEnumerator<string> dependents = dg.GetDependents("e").GetEnumerator();
+            Assert.IsFalse(dependents.MoveNext());
+        }
+
+        [TestMethod]
+        public void EmptyDependeeInfo()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            Assert.AreEqual(0, dg.Size);
+            Assert.IsFalse(dg.HasDependees("d"));
+            IEnumerator<string> dependees = dg.GetDependees("e").GetEnumerator();
+            Assert.IsFalse(dependees.MoveNext());
+        }
+
+        private void TestEnumerator<T> (IEnumerator<T> enumerator, List<T> expected)
+        {
+            while (enumerator.MoveNext())
+            {
+                bool foundExpected = false;
+                for(int i = 0; i < expected.Count; i++)
+                {
+                    if(enumerator.Current.Equals(expected[i]))
+                    {
+                        expected.RemoveAt(i);
+                        foundExpected = true;
+                        break;
+                    }
+                }
+                if (!foundExpected)
+                    Assert.Fail("Expected an element of " + expected + " but got " + enumerator.Current);
+            }
+        }
+
+        [TestMethod]
+        public void SmallDependencyGraphDependentInfo()
+        {
+            DependencyGraph dg = new DependencyGraph();
+
+            dg.AddDependency("Taco Del Mar", "me");
+            dg.AddDependency("Blender", "me");
+            dg.AddDependency("Unity", "me");
+            dg.AddDependency("Blender", "Unity");
+
+            Assert.AreEqual(4, dg.Size);
+            Assert.AreEqual(0, dg["me"]);
+            Assert.AreEqual(1, dg["Unity"]);
+            Assert.IsFalse(dg.HasDependents("me"));
+            Assert.IsTrue(dg.HasDependents("Taco Del Mar"));
+
+            TestEnumerator(dg.GetDependents("Blender").GetEnumerator(), new List<string>(new string[] { "me", "Unity" }));
+        }
+
+        [TestMethod]
+        public void SmallDependencyGraphDependeeInfo()
+        {
+            DependencyGraph dg = new DependencyGraph();
+
+            dg.AddDependency("Taco Del Mar", "me");
+            dg.AddDependency("Blender", "me");
+            dg.AddDependency("Unity", "me");
+            dg.AddDependency("Blender", "Unity");
+
+            Assert.AreEqual(4, dg.Size);
+            Assert.IsTrue(dg.HasDependees("me"));
+            Assert.IsFalse(dg.HasDependees("Taco Del Mar"));
+
+            TestEnumerator(dg.GetDependees("me").GetEnumerator(), new List<string>(new string[] { "Taco Del Mar", "Blender", "Unity" }));
+        }
     }
 }
