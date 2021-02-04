@@ -91,7 +91,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            return dependents.GetOrDefault(s, new HashSet<string>()).Count == 0;
+            return dependents.GetOrDefault(s, new HashSet<string>()).Count != 0;
         }
 
 
@@ -100,7 +100,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
-            return dependees.GetOrDefault(s, new HashSet<string>()).Count == 0;
+            return dependees.GetOrDefault(s, new HashSet<string>()).Count != 0;
         }
 
 
