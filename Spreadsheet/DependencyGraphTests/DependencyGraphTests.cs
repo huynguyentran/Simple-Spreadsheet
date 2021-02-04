@@ -337,5 +337,25 @@ namespace DevelopmentTests
 
             TestEnumerator(dg.GetDependees("me").GetEnumerator(), new List<string>(new string[] { "Taco Del Mar", "Blender", "Unity" }));
         }
+
+        private void TestNode(DependencyGraph dg, string node, string[] dependents, string[] dependees)
+        {
+            Assert.AreEqual(dependents.Length, dg[node]);
+
+            Assert.AreEqual(dependents.Length > 0, dg.HasDependents(node));
+            Assert.AreEqual(dependees.Length > 0, dg.HasDependees(node));
+
+            TestEnumerator(dg.GetDependents(node).GetEnumerator(), new List<string>(dependents));
+            TestEnumerator(dg.GetDependees(node).GetEnumerator(), new List<string>(dependees));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void DependencyNullNodeWorks()
+        {
+            DependencyGraph dg = new DependencyGraph();
+
+            dg.AddDependency(null, "what");
+        }
     }
 }
