@@ -148,7 +148,7 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
-            if (dependents[s].Remove(t) && dependees[t].Remove(s))
+            if (dependents.ContainsKey(s) && dependents[s].Remove(t) && dependees.ContainsKey(t) && dependees[t].Remove(s))
                 pairCount--;
         }
 
