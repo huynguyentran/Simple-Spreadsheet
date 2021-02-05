@@ -354,8 +354,105 @@ namespace DevelopmentTests
         public void DependencyNullNodeWorks()
         {
             DependencyGraph dg = new DependencyGraph();
-
+            //Dictionaries can't take null as a key, so an error will be thrown.
             dg.AddDependency(null, "what");
+        }
+
+        [TestMethod]
+        public void SimpleRemoveTest()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.AddDependency("a", "b");
+            dg.AddDependency("b", "c");
+            dg.AddDependency("c", "a");
+
+            dg.RemoveDependency("a", "b");
+
+            TestNode(dg, "a", new string[] { }, new string[] {"c"});
+            TestNode(dg, "b", new string[] {"c"}, new string[] { });
+            TestNode(dg, "c", new string[] {"a"}, new string[] {"b"});
+        }
+
+        [TestMethod]
+        public void RemoveNonexistentPairsTest()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            dg.RemoveDependency("a", "b");
+            Assert.AreEqual(0, dg.Size);
+
+            dg.AddDependency("a", "c");
+            dg.RemoveDependency("a", "b");
+            Assert.AreEqual(1, dg.Size);
+
+            dg.RemoveDependency("d", "c");
+            Assert.AreEqual(1, dg.Size);
+        }
+
+        [TestMethod]
+        public void EmptyReplace()
+        {
+            DependencyGraph dg = new DependencyGraph();
+            
+            dg.ReplaceDependents("a", new string[] { "t", "r", "f", "q" });
+            dg.ReplaceDependees("c", new string[] { "9", "y", "a" });
+
+            TestNode(dg, "a", new string[] { "t", "r", "f", "q", "c" }, new string[0]);
+            TestNode(dg, "c", new string[0], new string[] { "9", "y", "a" });
+        }
+
+        /// <summary>
+        /// Replacing a relationship that already exists.
+        /// </summary>
+        [TestMethod]
+        public void ReReplace()
+        {
+            DependencyGraph dg = new DependencyGraph();
+
+            dg.AddDependency("a", "b");
+            dg.AddDependency("c", "b");
+            dg.AddDependency("d", "b");
+
+            dg.ReplaceDependees("b", new string[] { "d" });
+
+            TestNode(dg, "b", new string[] { }, new string[] {"d"});
+
+            dg.ReplaceDependents("d", new string[] { "b" });
+
+            TestNode(dg, "d", new string[] { "b" }, new string[] { });
+
+            dg.RemoveDependency("d", "b");
+
+            TestNode(dg, "b", new string[] { }, new string[] { });
+            TestNode(dg, "d", new string[] { }, new string[] { });
+
+        }
+
+        [TestMethod]
+        public void SelfDependent()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                DependencyGraph dg = new DependencyGraph();
+
+                dg.AddDependency("1", "1");
+
+                TestNode(dg, "1", new string[] { "1" }, new string[] { "1" });
+                
+                switch (i)
+                {
+                    case 0:
+                        dg.ReplaceDependents("1", new string[] { });
+                        break;
+                    case 1:
+                        dg.ReplaceDependees("1", new string[] { });
+                        break;
+                    case 2:
+                        dg.RemoveDependency("1", "1");
+                        break;
+                }
+
+                TestNode(dg, "1", new string[0], new string[0]);
+            }
         }
     }
 }
