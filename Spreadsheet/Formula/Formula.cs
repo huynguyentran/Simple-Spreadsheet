@@ -43,8 +43,11 @@ namespace SpreadsheetUtilities
     /// that it consist of a letter or underscore followed by zero or more letters, underscores,
     /// or digits.)  Their use is described in detail in the constructor and method comments.
     /// </summary>
+
     public class Formula
     {
+        private string stringRep;
+
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
         /// described in the class comment.  If the expression is syntactically invalid,
@@ -82,6 +85,17 @@ namespace SpreadsheetUtilities
         /// </summary>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
+            stringRep = formula;
+        }
+
+        private bool IsVariable(string token)
+        {
+            return new Regex(@"^[a-zA-Z_][a-zA-Z_0-9]*$").IsMatch(token);
+        }
+
+        private bool IsDecimal(string token)
+        {
+            return Double.TryParse(token, out double throwaway);
         }
 
         /// <summary>
