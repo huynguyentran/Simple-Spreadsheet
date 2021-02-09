@@ -53,7 +53,7 @@ namespace SpreadsheetUtilities
         private Func<string, string> normalizer;
         private Func<string, bool> validator;
 
-        private static readonly Regex variableRegex = new Regex(@"^[a-zA-Z_][a-zA-Z_0-9]*$"); 
+        private static readonly Regex variableRegex = new Regex(@"^[a-zA-Z_][a-zA-Z_0-9]*$");
 
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
@@ -92,9 +92,21 @@ namespace SpreadsheetUtilities
         /// </summary>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
-            stringRep = formula;
+            stringRep = "";
             normalizer = normalize;
             validator = isValid;
+
+            ValidateAndNormalize[] valueConverters = new ValidateAndNormalize[] { IsVariable, IsDecimal };
+            
+            foreach(string token in GetTokens(formula))
+            {
+                string tempToken = token;
+                if (IsValue(ref tempToken, valueConverters))
+                {
+                    stringRep += tempToken;
+                }
+            }
+
         }
 
         private bool IsVariable(ref string token)
@@ -112,13 +124,24 @@ namespace SpreadsheetUtilities
             return false;
         }
 
-        private bool IsDecimal(ref string token)
+        private static bool IsDecimal(ref string token)
         {
             if (Double.TryParse(token, out double doubleRep))
             {
                 token = doubleRep.ToString();
                 return true;
             }
+            return false;
+        }
+
+        private bool IsValue(ref string token, ValidateAndNormalize[] valueConverters)
+        {
+            foreach(ValidateAndNormalize vAndN in valueConverters)
+            {
+                if (vAndN(ref token))
+                    return true;
+            }
+
             return false;
         }
 
