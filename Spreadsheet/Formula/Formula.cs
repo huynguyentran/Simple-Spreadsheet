@@ -55,6 +55,8 @@ namespace SpreadsheetUtilities
 
         private static readonly Regex variableRegex = new Regex(@"^[a-zA-Z_][a-zA-Z_0-9]*$");
 
+        private HashSet<String> variables = new HashSet<string>();
+
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
         /// described in the class comment.  If the expression is syntactically invalid,
@@ -117,6 +119,7 @@ namespace SpreadsheetUtilities
                 if (validator(tempToken))
                 {
                     token = tempToken;
+                    variables.Add(token);
                     return true;
                 }
             }
@@ -184,7 +187,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<String> GetVariables()
         {
-            return null;
+            return variables;
         }
 
         /// <summary>
