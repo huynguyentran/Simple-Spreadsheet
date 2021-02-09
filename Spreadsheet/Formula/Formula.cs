@@ -44,9 +44,16 @@ namespace SpreadsheetUtilities
     /// or digits.)  Their use is described in detail in the constructor and method comments.
     /// </summary>
 
+    public delegate bool ValidateAndNormalize(ref string token);
+
     public class Formula
     {
         private string stringRep;
+
+        private Func<string, string> normalizer;
+        private Func<string, bool> validator;
+
+        private static readonly Regex variableRegex = new Regex(@"^[a-zA-Z_][a-zA-Z_0-9]*$"); 
 
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
@@ -86,16 +93,33 @@ namespace SpreadsheetUtilities
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
             stringRep = formula;
+            normalizer = normalize;
+            validator = isValid;
         }
 
-        private bool IsVariable(string token)
-        {
-            return new Regex(@"^[a-zA-Z_][a-zA-Z_0-9]*$").IsMatch(token);
+        private bool IsVariable(ref string token)
+        {   
+            if (variableRegex.IsMatch(token))
+            {
+                string tempToken = normalizer(token);
+                if (validator(tempToken))
+                {
+                    token = tempToken;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        private bool IsDecimal(string token)
+        private bool IsDecimal(ref string token)
         {
-            return Double.TryParse(token, out double throwaway);
+            if (Double.TryParse(token, out double doubleRep))
+            {
+                token = doubleRep.ToString();
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
