@@ -54,6 +54,7 @@ namespace SpreadsheetUtilities
         private Func<string, bool> validator;
 
         private static readonly Regex variableRegex = new Regex(@"^[a-zA-Z_][a-zA-Z_0-9]*$");
+        private static readonly FormulaOperator[] operators = new FormulaOperator[] {new Plus(), new Minus(), new Times(), new Divide(), new LeftParenthesis(), new RightParenthesis()};
 
         private HashSet<String> variables = new HashSet<string>();
 
