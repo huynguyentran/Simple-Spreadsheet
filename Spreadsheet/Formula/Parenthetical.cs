@@ -8,10 +8,10 @@ namespace SpreadsheetUtilities
     /// </summary>
     abstract class Parenthetical : FormulaOperator
     {
-        public override double DoOperation(double[] operands)
+        public override object DoOperation(double[] operands)
         {
             base.DoOperation(operands);
-            throw new NotImplementedException();
+            throw new NotImplementedException("Parenthesis can't do operations.");
         }
 
         public override int GetOperandCount()
@@ -50,16 +50,45 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="values">The integer values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
-        public override void HandleStacks(Stack<double> values, Stack<FormulaOperator> operators)
+        public override bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out object operationResult)
         {
-            DoOperationIf<Additive>(values, operators);
+            operationResult = null;
+            if (DoOperationIf<Additive>(values, operators, out object additionResult)
+                && !GotDouble(additionResult, values, ref operationResult))
+            {
+                return false;
+            }
 
             if (operators.IsOnTop<FormulaOperator, LeftParenthesis>())
                 operators.Pop();
             else
-                throw new ArgumentException("Expected left parenthesis but found none.");
+                throw new FormulaFormatException("Expected left parenthesis but found none.");
 
-            DoOperationIf<Multiplicative>(values, operators);
+            if (DoOperationIf<Multiplicative>(values, operators, out object multiplicationResult)
+                && !GotDouble(multiplicationResult, values, ref operationResult))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool GotDouble(object result, Stack<double> values, ref object resultHolder)
+        {
+            if (result is double d)
+            {
+                values.Push(d);
+                return true;
+            }
+            else if (result is FormulaError e)
+            {
+                resultHolder = e;
+                return false;
+            }
+            else
+            {
+                throw new ArgumentNullException("Expected operation to return a double or error. Got neither: " + result);
+            }
         }
     }
 }

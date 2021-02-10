@@ -28,11 +28,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="operands">The operands of the operator.</param>
         /// <returns>The double output of the operation.</returns>
-        public virtual double DoOperation(double[] operands)
+        public virtual object DoOperation(double[] operands)
         {
             if (operands.Length != GetOperandCount())
                 throw new ArgumentException("Operator " + this + " takes " + GetOperandCount() + " operands, but got " + operands.Length + ".");
-            return 1;
+            return null;
         }
 
         // I'm overriding the ToString method to force operators to have good string representations.
@@ -49,9 +49,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="values">The double values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
-        public virtual void HandleStacks(Stack<double> values, Stack<FormulaOperator> operators)
+        public virtual bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out object operationResult)
         {
+            operationResult = null;
             operators.Push(this);
+            return true;
         }
 
         /// <summary>
@@ -59,25 +61,31 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="values">The double values processed thus far by the FunctionEvaluator.</param>
         /// <param name="op">The operator to evaluate with the values's operands.</param>
-        public static void DoOperationWith(Stack<double> values, FormulaOperator op)
+        public static object DoOperationWith(Stack<double> values, FormulaOperator op)
         {
             if (values.TryPops(op.GetOperandCount(), out double[] operands))
-                values.Push(op.DoOperation(operands));
+                return op.DoOperation(operands);
             else
                 throw new ArgumentException("Tried to perform operation, but operands were missing.");
         }
 
         /// <summary>
         /// Performs an operation on the most recent values extracted by the FunctionEvaluator 
-        /// <para>if the most recent operator extracted FunctionEvaluator by matches the desired operation.
+        /// <para>if the most recent operator extracted by FunctionEvaluator matches the desired operation.
         /// </summary>
         /// <typeparam name="T">The type of operator to look for.</typeparam>
         /// <param name="values">The double values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
-        public static void DoOperationIf<T>(Stack<double> values, Stack<FormulaOperator> operators) where T: FormulaOperator
+        public static bool DoOperationIf<T>(Stack<double> values, Stack<FormulaOperator> operators, out object operationResult) where T: FormulaOperator
         {
+            operationResult = null;
+
             if (operators.IsOnTop<FormulaOperator, T>())
-                DoOperationWith(values, operators.Pop());
+            {
+                operationResult = DoOperationWith(values, operators.Pop());
+                return true; 
+            }
+            return false;
         }
     }
 }

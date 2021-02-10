@@ -18,7 +18,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     class Times : Multiplicative
     {
-        public override double DoOperation(double[] operands)
+        public override object DoOperation(double[] operands)
         {
             base.DoOperation(operands);
             return operands[0] * operands[1];
@@ -35,12 +35,12 @@ namespace SpreadsheetUtilities
     /// </summary>
     class Divide : Multiplicative
     {
-        public override double DoOperation(double[] operands)
+        public override object DoOperation(double[] operands)
         {
             base.DoOperation(operands);
 
             if (operands[1] == 0)
-                throw new ArgumentException("Recieved the arguments " + operands[0] + " / " + operands[1] + " for division; cannot divide by zero.");
+                return new FormulaError("Recieved the arguments " + operands[0] + " / " + operands[1] + " for division; cannot divide by zero.");
             
             return operands[0] / operands[1];
         }
