@@ -6,8 +6,13 @@ namespace SpreadsheetUtilities
     /// <summary>
     /// The abstract representation of an double operator.
     /// </summary>
-    abstract class FormulaOperator
+    abstract class FormulaOperator : FormulaElement
     {
+        protected override HashSet<Type> followers
+        {
+            get { return new HashSet<Type>() { typeof(Value), typeof(LeftParenthesis) }; }
+        }
+
         /// <summary>
         /// Whether a token matches the operator.
         /// </summary>

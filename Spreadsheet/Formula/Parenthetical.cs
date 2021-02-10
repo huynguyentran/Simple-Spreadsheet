@@ -36,6 +36,10 @@ namespace SpreadsheetUtilities
     /// </summary>
     class RightParenthesis : Parenthetical
     {
+        protected override HashSet<Type> followers
+        {
+            get { return new HashSet<Type>() { typeof(Additive), typeof(Multiplicative) }; }
+        }
         public override string ToString()
         {
             return ")";

@@ -56,7 +56,9 @@ namespace SpreadsheetUtilities
         private static readonly Regex variableRegex = new Regex(@"^[a-zA-Z_][a-zA-Z_0-9]*$");
         private static readonly FormulaOperator[] operators = new FormulaOperator[] {new Plus(), new Minus(), new Times(), new Divide(), new LeftParenthesis(), new RightParenthesis()};
 
-        private HashSet<String> variables = new HashSet<string>();
+        private readonly HashSet<String> variables = new HashSet<string>();
+
+        private readonly LinkedList<FormulaElement> formulaElements = new LinkedList<FormulaElement>();
 
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
@@ -104,10 +106,42 @@ namespace SpreadsheetUtilities
             foreach(string token in GetTokens(formula))
             {
                 string tempToken = token;
+                FormulaElement current = null;
                 if (IsValue(ref tempToken, valueConverters))
                 {
                     stringRep += tempToken;
+                    current = new Value(tempToken);
                 }
+                else if(IsOperator(tempToken, out FormulaOperator op))
+                {
+                    stringRep += op.ToString();
+                    current = op;
+                }
+
+                bool isValidFollow = false;
+                string errorMessage;
+
+                if (formulaElements.Count == 1)
+                {
+                    isValidFollow = (current is Value) || (current is LeftParenthesis);
+                    errorMessage = "A " + current + " of type " + current.GetType() + 
+                        " cannot start a formula. Is a value missing at the beginning?";
+                }
+                else
+                {
+                    FormulaElement last = formulaElements.Last.Value;
+
+                    isValidFollow = last.CanFollow(current);
+                    errorMessage = "A " + current + " of type " + current.GetType() +
+                        " cannot follow a" + last + " of type " + last.GetType() +". Is an operator missing a value?";
+                }
+
+                if (isValidFollow)
+                {
+                    formulaElements.AddLast(current);
+                }
+                else
+                    throw new FormulaFormatException(errorMessage);
             }
 
         }
@@ -146,6 +180,20 @@ namespace SpreadsheetUtilities
                     return true;
             }
 
+            return false;
+        }
+
+        private bool IsOperator(string token, out FormulaOperator op)
+        {
+            op = null;
+            foreach (FormulaOperator possibleOp in operators)
+            {
+                if (possibleOp.IsOperator(token))
+                {
+                    op = possibleOp;
+                    return true;
+                }
+            }
             return false;
         }
 
