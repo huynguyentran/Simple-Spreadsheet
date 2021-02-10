@@ -8,7 +8,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     abstract class Parenthetical : FormulaOperator
     {
-        public override int DoOperation(int[] operands)
+        public override double DoOperation(double[] operands)
         {
             base.DoOperation(operands);
             throw new NotImplementedException();
@@ -50,7 +50,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="values">The integer values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
-        public override void HandleStacks(Stack<int> values, Stack<FormulaOperator> operators)
+        public override void HandleStacks(Stack<double> values, Stack<FormulaOperator> operators)
         {
             DoOperationIf<Additive>(values, operators);
 

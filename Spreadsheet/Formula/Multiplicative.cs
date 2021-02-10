@@ -18,7 +18,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     class Times : Multiplicative
     {
-        public override int DoOperation(int[] operands)
+        public override double DoOperation(double[] operands)
         {
             base.DoOperation(operands);
             return operands[0] * operands[1];
@@ -35,7 +35,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     class Divide : Multiplicative
     {
-        public override int DoOperation(int[] operands)
+        public override double DoOperation(double[] operands)
         {
             base.DoOperation(operands);
 

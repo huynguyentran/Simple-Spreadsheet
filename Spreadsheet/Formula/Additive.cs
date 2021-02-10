@@ -13,7 +13,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="values">The integer values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
-        override public void HandleStacks(Stack<int> values, Stack<FormulaOperator> operators)
+        override public void HandleStacks(Stack<double> values, Stack<FormulaOperator> operators)
         {
             DoOperationIf<Additive>(values, operators);
             operators.Push(this);
@@ -30,7 +30,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     class Plus : Additive
     {
-        override public int DoOperation (int[] operands)
+        override public double DoOperation (double[] operands)
         {
             base.DoOperation(operands);
             return operands[0] + operands[1];
@@ -47,7 +47,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     class Minus : Additive
     {
-        override public int DoOperation(int[] operands)
+        override public double DoOperation(double[] operands)
         {
             base.DoOperation(operands);
             return operands[0] - operands[1];
