@@ -82,7 +82,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return dependents.GetOrDefault(s, new HashSet<string>()).Count; }
+            get { return dependees.GetOrDefault(s, new HashSet<string>()).Count; }
         }
 
 
