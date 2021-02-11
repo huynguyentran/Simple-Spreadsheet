@@ -102,11 +102,16 @@ namespace SpreadsheetUtilities
             validator = isValid;
 
             ValidateAndNormalize[] valueConverters = new ValidateAndNormalize[] { IsVariable, IsDecimal };
+
+            Stack<FormulaOperator> parentheses = new Stack<FormulaOperator>();
+            //This should stay empty throughout the constructor.
+            Stack<double> emptyValues = new Stack<double>();
             
             foreach(string token in GetTokens(formula))
             {
                 string tempToken = token;
                 FormulaElement current = null;
+
                 if (IsValue(ref tempToken, valueConverters))
                 {
                     stringRep += tempToken;
@@ -116,12 +121,14 @@ namespace SpreadsheetUtilities
                 {
                     stringRep += op.ToString();
                     current = op;
+                    if (op is Parenthetical)
+                        op.HandleStacks(emptyValues, parentheses, out object operationResult); //It is impossible to get a FormulaError, so we can ignore the result.
                 }
 
                 bool isValidFollow = false;
                 string errorMessage;
 
-                if (formulaElements.Count == 1)
+                if (formulaElements.Count == 0)
                 {
                     isValidFollow = (current is Value) || (current is LeftParenthesis);
                     errorMessage = "A " + current + " of type " + current.GetType() + 
@@ -133,7 +140,7 @@ namespace SpreadsheetUtilities
 
                     isValidFollow = last.CanFollow(current);
                     errorMessage = "A " + current + " of type " + current.GetType() +
-                        " cannot follow a" + last + " of type " + last.GetType() +". Is an operator missing a value?";
+                        " cannot follow a " + last + " of type " + last.GetType() +". Is an operator missing a value?";
                 }
 
                 if (isValidFollow)
@@ -144,6 +151,8 @@ namespace SpreadsheetUtilities
                     throw new FormulaFormatException(errorMessage);
             }
 
+            if (parentheses.Count > 0)
+                throw new FormulaFormatException(parentheses.Count + " left parentheses are missing right pairs.");
         }
 
         private bool IsVariable(ref string token)
