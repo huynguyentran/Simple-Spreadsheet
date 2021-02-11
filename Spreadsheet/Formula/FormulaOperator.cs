@@ -46,12 +46,13 @@ namespace SpreadsheetUtilities
 
         /// <summary>
         /// Processes the stacks of the FunctionEvaluator to keep operator precedence.
+        /// Error cannot be anything but an Error or Null.
         /// </summary>
         /// <param name="values">The double values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
-        public virtual bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out object operationResult)
+        public virtual bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out OperatorError error)
         {
-            operationResult = null;
+            error = null;
             operators.Push(this);
             return true;
         }
@@ -87,5 +88,32 @@ namespace SpreadsheetUtilities
             }
             return false;
         }
+
+        protected bool GotDouble(object result, Stack<double> values, ref OperatorError resultHolder)
+        {
+            if (result is double d)
+            {
+                values.Push(d);
+                return true;
+            }
+            else if (result is FormulaError e)
+            {
+                resultHolder = new OperatorError(e);
+                return false;
+            }
+            else
+            {
+                throw new ArgumentNullException("Expected operation to return a double or error. Got neither: " + result);
+            }
+        }
+    }
+
+    public class OperatorError
+    {
+        public OperatorError(FormulaError e)
+        {
+            error = e;
+        }
+        public FormulaError error { get; private set; }
     }
 }

@@ -13,11 +13,14 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="values">The integer values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
-        override public bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out object operationResult)
+        override public bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out OperatorError error)
         {
-            DoOperationIf<Additive>(values, operators, out operationResult);
-            if (operationResult is FormulaError)
+            error = null;
+
+            if (DoOperationIf<Additive>(values, operators, out object result)
+                && !GotDouble(result, values, ref error))
                 return false;
+            
             operators.Push(this);
             return true;
         }

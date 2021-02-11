@@ -10,7 +10,6 @@ namespace SpreadsheetUtilities
     {
         public override object DoOperation(double[] operands)
         {
-            base.DoOperation(operands);
             throw new NotImplementedException("Parenthesis can't do operations.");
         }
 
@@ -50,7 +49,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="values">The integer values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
-        public override bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out object operationResult)
+        public override bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out OperatorError operationResult)
         {
             operationResult = null;
             if (DoOperationIf<Additive>(values, operators, out object additionResult)
@@ -71,24 +70,6 @@ namespace SpreadsheetUtilities
             }
 
             return true;
-        }
-
-        private bool GotDouble(object result, Stack<double> values, ref object resultHolder)
-        {
-            if (result is double d)
-            {
-                values.Push(d);
-                return true;
-            }
-            else if (result is FormulaError e)
-            {
-                resultHolder = e;
-                return false;
-            }
-            else
-            {
-                throw new ArgumentNullException("Expected operation to return a double or error. Got neither: " + result);
-            }
         }
     }
 }

@@ -122,7 +122,7 @@ namespace SpreadsheetUtilities
                     stringRep += op.ToString();
                     current = op;
                     if (op is Parenthetical)
-                        op.HandleStacks(emptyValues, parentheses, out object operationResult); //It is impossible to get a FormulaError, so we can ignore the result.
+                        op.HandleStacks(emptyValues, parentheses, out OperatorError opError); //It is impossible to get an OperatorError, so we can ignore the result.
                 }
 
                 bool isValidFollow = false;
@@ -152,7 +152,10 @@ namespace SpreadsheetUtilities
             }
 
             if (parentheses.Count > 0)
-                throw new FormulaFormatException(parentheses.Count + " left parentheses are missing right pairs.");
+                throw new FormulaFormatException(parentheses.Count + " left parentheses are missing right pairs. Do all parentheses have their pairs?");
+
+            if (formulaElements.Count < 0 || stringRep == "")
+                throw new FormulaFormatException("No tokens were detected. Are you sure you wrote anything?");
         }
 
         private bool IsVariable(ref string token)
@@ -229,7 +232,67 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
-            return null;
+            Stack<double> values = new Stack<double>();
+            Stack<FormulaOperator> operators = new Stack<FormulaOperator>();
+
+            foreach(FormulaElement element in formulaElements)
+            {
+                if (element is Value v)
+                {
+                    double doubleElement;
+                    string strElement = element.ToString();
+                    if (! Double.TryParse(strElement, out doubleElement))
+                    {
+                        try
+                        {
+                            doubleElement = lookup(strElement);
+                        }
+                        catch(ArgumentException e)
+                        {
+                            return new FormulaError("Couldn't find the value of variable " + strElement + ":\n" +e.Message);
+                        }
+                    }
+
+                    if (operators.IsOnTop<FormulaOperator, Multiplicative>())
+                    {
+                        object multiplicationResult;
+                        if (values.TryPop(out double valueLeft))
+                            multiplicationResult = operators.Pop().DoOperation(new double[] { valueLeft, doubleElement });
+                        else
+                            throw new ArgumentException("The formula" + stringRep + "found a missing operand for addition after declaring itself valid.");
+
+                        if (multiplicationResult is double d)
+                            doubleElement = d;
+                        else
+                            return multiplicationResult;
+                    }
+
+                    values.Push(doubleElement);
+                }
+                else if (element is FormulaOperator op)
+                {
+                    if (!op.HandleStacks(values, operators, out OperatorError opError))
+                    {
+                        if (ReferenceEquals(opError, null))
+                            throw new ArgumentException("An operator failed to handle the stacks without giving a reason.");
+
+                        return opError.error;
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("The formula" + stringRep +  "found an unrecognized FormulaOperator " + element + " of type " + element.GetType() + ".");
+                }
+            }
+
+            if (operators.Count == 1)
+                if (!FormulaOperator.DoOperationIf<Additive>(values, operators, out object error))
+                    throw new ArgumentException("The formula" + stringRep + " finished with an operator other than + or - after being validated");
+
+            if (values.Count == 1 && operators.Count == 0)
+                return values.Pop();
+            else
+                throw new ArgumentException("The formula" + stringRep + " finished with excess operators or values. Is a left parenthesis missing a right pair?");
         }
 
         /// <summary>
