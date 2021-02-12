@@ -104,8 +104,6 @@ namespace SpreadsheetUtilities
             ValidateAndNormalize[] valueConverters = new ValidateAndNormalize[] { IsVariable, IsDecimal };
 
             Stack<FormulaOperator> parentheses = new Stack<FormulaOperator>();
-            //This should stay empty throughout the constructor.
-            Stack<double> emptyValues = new Stack<double>();
             
             foreach(string token in GetTokens(formula))
             {
@@ -121,8 +119,8 @@ namespace SpreadsheetUtilities
                 {
                     stringRep += op.ToString();
                     current = op;
-                    if (op is Parenthetical)
-                        op.HandleStacks(emptyValues, parentheses, out OperatorError opError); //It is impossible to get an OperatorError, so we can ignore the result.
+                    if (op is Parenthetical p)
+                        p.HandleStacks(parentheses);
                 }
 
                 bool isValidFollow = false;
@@ -140,7 +138,7 @@ namespace SpreadsheetUtilities
 
                     isValidFollow = last.CanFollow(current);
                     errorMessage = "A " + current + " of type " + current.GetType() +
-                        " cannot follow a " + last + " of type " + last.GetType() +". Is an operator missing a value?";
+                        " cannot follow a " + last + " of type " + last.GetType() +". Is an operator missing an operand, or is there a value without an operator?";
                 }
 
                 if (isValidFollow)
@@ -155,7 +153,7 @@ namespace SpreadsheetUtilities
                 throw new FormulaFormatException(parentheses.Count + " left parentheses are missing right pairs. Do all parentheses have their pairs?");
 
             if (formulaElements.Count < 0 || stringRep == "")
-                throw new FormulaFormatException("No tokens were detected. Are you sure you wrote anything?");
+                throw new FormulaFormatException("No tokens were detected. Are you sure anything is written?");
         }
 
         private bool IsVariable(ref string token)
@@ -184,7 +182,7 @@ namespace SpreadsheetUtilities
             return false;
         }
 
-        private bool IsValue(ref string token, ValidateAndNormalize[] valueConverters)
+        private static bool IsValue(ref string token, ValidateAndNormalize[] valueConverters)
         {
             foreach(ValidateAndNormalize vAndN in valueConverters)
             {

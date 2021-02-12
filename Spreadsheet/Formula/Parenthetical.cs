@@ -17,6 +17,8 @@ namespace SpreadsheetUtilities
         {
             return 0;
         }
+
+        public abstract void HandleStacks(Stack<FormulaOperator> operators);
     }
 
     /// <summary>
@@ -27,6 +29,11 @@ namespace SpreadsheetUtilities
         public override string ToString()
         {
             return "(";
+        }
+
+        public override void HandleStacks(Stack<FormulaOperator> operators)
+        {
+            operators.Push(this);
         }
     }
 
@@ -58,10 +65,7 @@ namespace SpreadsheetUtilities
                 return false;
             }
 
-            if (operators.IsOnTop<FormulaOperator, LeftParenthesis>())
-                operators.Pop();
-            else
-                throw new FormulaFormatException("Expected left parenthesis but found none.");
+            HandleStacks(operators);
 
             if (DoOperationIf<Multiplicative>(values, operators, out object multiplicationResult)
                 && !GotDouble(multiplicationResult, values, ref operationResult))
@@ -70,6 +74,14 @@ namespace SpreadsheetUtilities
             }
 
             return true;
+        }
+
+        public override void HandleStacks(Stack<FormulaOperator> operators)
+        {
+            if (operators.IsOnTop<FormulaOperator, LeftParenthesis>())
+                operators.Pop();
+            else
+                throw new FormulaFormatException("Expected left parenthesis but found none.");
         }
     }
 }
