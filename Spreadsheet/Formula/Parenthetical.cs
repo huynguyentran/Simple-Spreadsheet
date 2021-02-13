@@ -8,6 +8,7 @@ namespace SpreadsheetUtilities
     /// </summary>
     abstract class Parenthetical : FormulaOperator
     {
+        //Do operation should never be called on a parenthesis.
         public override object DoOperation(double[] operands)
         {
             throw new NotImplementedException("Parenthesis can't do operations.");
@@ -18,6 +19,11 @@ namespace SpreadsheetUtilities
             return 0;
         }
 
+        /// <summary>
+        /// This handle stacks is used in formula construction to check for a correct
+        /// number of parentheses.
+        /// </summary>
+        /// <param name="operators">The operators stack.</param>
         public abstract void HandleStacks(Stack<FormulaOperator> operators);
     }
 
@@ -54,8 +60,6 @@ namespace SpreadsheetUtilities
         /// <summary>
         /// A right parenthesis looks for its partner left parenthesis in the operators stack.
         /// </summary>
-        /// <param name="values">The integer values processed thus far by the FunctionEvaluator.</param>
-        /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
         public override bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out OperatorError operationResult)
         {
             operationResult = null;

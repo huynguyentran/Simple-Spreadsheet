@@ -8,6 +8,9 @@ namespace SpreadsheetUtilities
     /// </summary>
     abstract class FormulaOperator : FormulaElement
     {
+        /// <summary>
+        /// Most operators can come before a value or a left parenthesis.
+        /// </summary>
         protected override HashSet<Type> followers
         {
             get { return new HashSet<Type>() { typeof(Value), typeof(LeftParenthesis) }; }
@@ -27,7 +30,7 @@ namespace SpreadsheetUtilities
         /// Performs the operator's function on the number of operands the operator takes.
         /// </summary>
         /// <param name="operands">The operands of the operator.</param>
-        /// <returns>The double output of the operation.</returns>
+        /// <returns>The output of the operation, a double or an OperatorError.</returns>
         public virtual object DoOperation(double[] operands)
         {
             if (operands.Length != GetOperandCount())
@@ -46,10 +49,11 @@ namespace SpreadsheetUtilities
 
         /// <summary>
         /// Processes the stacks of the FunctionEvaluator to keep operator precedence.
-        /// Error cannot be anything but an Error or Null.
+        /// Error cannot be anything but an OperatorError or null.
         /// </summary>
         /// <param name="values">The double values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
+        /// <param name = "error">An error caused by the operation or null.</param>
         public virtual bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out OperatorError error)
         {
             error = null;
@@ -77,6 +81,7 @@ namespace SpreadsheetUtilities
         /// <typeparam name="T">The type of operator to look for.</typeparam>
         /// <param name="values">The double values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
+        /// <paramref name="operationResult"/>The result of the operation.</param>
         public static bool DoOperationIf<T>(Stack<double> values, Stack<FormulaOperator> operators, out object operationResult) where T: FormulaOperator
         {
             operationResult = null;
@@ -89,7 +94,16 @@ namespace SpreadsheetUtilities
             return false;
         }
 
-        public static bool GotDouble(object result, Stack<double> values, ref OperatorError resultHolder)
+        /// <summary>
+        /// Checks whether the output of a operation is a double, error, or null and responds accordingly.
+        /// </summary>
+        /// <param name="result">The result of the operation.</param>
+        /// <param name="values">The values to push the result onto if it is a double.</param>
+        /// <param name="error">The error, if an error results from the operation.</param>
+        /// <returns>True if the result is a double;
+        ///  false if the result is an error;
+        ///  an exception is thrown if the result is null.</returns>
+        public static bool GotDouble(object result, Stack<double> values, ref OperatorError error)
         {
             if (result is double d)
             {
@@ -98,7 +112,7 @@ namespace SpreadsheetUtilities
             }
             else if (result is FormulaError e)
             {
-                resultHolder = new OperatorError(e);
+                error = new OperatorError(e);
                 return false;
             }
             else
@@ -108,6 +122,9 @@ namespace SpreadsheetUtilities
         }
     }
 
+    /// <summary>
+    /// A wrapper class for FormulaError (to have null values).
+    /// </summary>
     public class OperatorError
     {
         public OperatorError(FormulaError e)

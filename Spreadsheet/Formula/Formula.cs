@@ -53,7 +53,13 @@ namespace SpreadsheetUtilities
         private Func<string, string> normalizer;
         private Func<string, bool> validator;
 
+        /// <summary>
+        /// The regex that identifies possible variables.
+        /// </summary>
         private static readonly Regex variableRegex = new Regex(@"^[a-zA-Z_]\w*$");
+        /// <summary>
+        /// The kinds of operators the formula can recognize.
+        /// </summary>
         private static readonly FormulaOperator[] operators = new FormulaOperator[] {new Plus(), new Minus(), new Times(), new Divide(), new LeftParenthesis(), new RightParenthesis()};
 
         private readonly HashSet<String> variables = new HashSet<string>();
@@ -74,27 +80,11 @@ namespace SpreadsheetUtilities
         }
 
         /// <summary>
-        /// Creates a Formula from a string that consists of an infix expression written as
-        /// described in the class comment.  If the expression is syntactically incorrect,
-        /// throws a FormulaFormatException with an explanatory Message.
-        /// 
-        /// The associated normalizer and validator are the second and third parameters,
-        /// respectively.  
-        /// 
-        /// If the formula contains a variable v such that normalize(v) is not a legal variable, 
-        /// throws a FormulaFormatException with an explanatory message. 
-        /// 
-        /// If the formula contains a variable v such that isValid(normalize(v)) is false,
-        /// throws a FormulaFormatException with an explanatory message.
-        /// 
-        /// Suppose that N is a method that converts all the letters in a string to upper case, and
-        /// that V is a method that returns true only if a string consists of one letter followed
-        /// by one digit.  Then:
-        /// 
-        /// new Formula("x2+y3", N, V) should succeed
-        /// new Formula("x+y3", N, V) should throw an exception, since V(N("x")) is false
-        /// new Formula("2x+y3", N, V) should throw an exception, since "2x+y3" is syntactically incorrect.
+        /// Creates a formula that can calculate the value from an infix expression of doubles.
         /// </summary>
+        /// <param name="formula">The string representation of the expression.</param>
+        /// <param name="normalize">A functor the normalizes variables to be recognized by the validator.</param>
+        /// <param name="isValid">A functor that decides whether a variable is valid.</param>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
             stringRep = "";
@@ -104,9 +94,10 @@ namespace SpreadsheetUtilities
             ValidateAndNormalize[] valueConverters = new ValidateAndNormalize[] { IsVariable, IsDecimal };
 
             Stack<FormulaOperator> parentheses = new Stack<FormulaOperator>();
-            
+            //Loop through all the tokens and determine whether it's a value or an operator.
             foreach(string token in GetTokens(formula))
             {
+                //tempToken will be the final string-ready version of the token.
                 string tempToken = token;
                 FormulaElement current = null;
 
@@ -128,6 +119,7 @@ namespace SpreadsheetUtilities
                 bool isValidFollow = false;
                 string errorMessage;
 
+                //Check if the detected token is in a spot that makes sense.
                 if (formulaElements.Count == 0)
                 {
                     isValidFollow = (current is Value) || (current is LeftParenthesis);
@@ -150,14 +142,16 @@ namespace SpreadsheetUtilities
                 else
                     throw new FormulaFormatException(errorMessage);
             }
-
+            //Checks if all parentheses are accounted for.
             if (parentheses.Count > 0)
                 throw new FormulaFormatException(parentheses.Count + " left parentheses are missing right pairs. Do all parentheses have their pairs?");
-
+            //A formula must have at least one token.
             if (formulaElements.Count < 0 || stringRep == "")
                 throw new FormulaFormatException("No tokens were detected. Are you sure anything is written?");
         }
 
+        /// <param name="token">The token to identify (it will take the normalized form once the method is done).</param>
+        /// <returns>Whether a token is a variable.</returns>
         private bool IsVariable(ref string token)
         {   
             if (variableRegex.IsMatch(token))
@@ -174,6 +168,8 @@ namespace SpreadsheetUtilities
             return false;
         }
 
+        /// <param name="token">The token to identify (it will take the normalized form once the method is done).</param>
+        /// <returns>Whether a token is a decimal.</returns>
         private static bool IsDecimal(ref string token)
         {
             if (Double.TryParse(token, out double doubleRep))
@@ -184,6 +180,9 @@ namespace SpreadsheetUtilities
             return false;
         }
 
+        /// <param name="token">The token to identify (it will take the normalized form once the method is done).</param>
+        /// <param name="valueConverters">The methods that identify and normalize values.</param>
+        /// <returns>Whether a token is a decimal.</returns>
         private static bool IsValue(ref string token, ValidateAndNormalize[] valueConverters)
         {
             foreach(ValidateAndNormalize vAndN in valueConverters)
@@ -195,6 +194,9 @@ namespace SpreadsheetUtilities
             return false;
         }
 
+        /// <param name="token">The token to identify.</param>
+        /// <param name="op">The type of operator the token is.</param>
+        /// <returns>Whether the token is an operator.</returns>
         private bool IsOperator(string token, out FormulaOperator op)
         {
             op = null;
@@ -211,24 +213,7 @@ namespace SpreadsheetUtilities
 
         /// <summary>
         /// Evaluates this Formula, using the lookup delegate to determine the values of
-        /// variables.  When a variable symbol v needs to be determined, it should be looked up
-        /// via lookup(normalize(v)). (Here, normalize is the normalizer that was passed to 
-        /// the constructor.)
-        /// 
-        /// For example, if L("x") is 2, L("X") is 4, and N is a method that converts all the letters 
-        /// in a string to upper case:
-        /// 
-        /// new Formula("x+7", N, s => true).Evaluate(L) is 11
-        /// new Formula("x+7").Evaluate(L) is 9
-        /// 
-        /// Given a variable symbol as its parameter, lookup returns the variable's value 
-        /// (if it has one) or throws an ArgumentException (otherwise).
-        /// 
-        /// If no undefined variables or divisions by zero are encountered when evaluating 
-        /// this Formula, the value is returned.  Otherwise, a FormulaError is returned.  
-        /// The Reason property of the FormulaError should have a meaningful explanation.
-        ///
-        /// This method should never throw an exception.
+        /// variables.
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
@@ -243,6 +228,7 @@ namespace SpreadsheetUtilities
                     string strElement = element.ToString();
                     if (! Double.TryParse(strElement, out doubleElement))
                     {
+                        //Look up the value if it is a variable.
                         try
                         {
                             doubleElement = lookup(strElement);
@@ -252,18 +238,18 @@ namespace SpreadsheetUtilities
                             return new FormulaError("Couldn't find the value of variable " + strElement + ":\n" +e.Message);
                         }
                     }
-
+                    //Performs multiplication if it is the latest operation added to the stack.
                     if (operators.IsOnTop<FormulaOperator, Multiplicative>())
                     {
                         object multiplicationResult;
                         if (values.TryPop(out double valueLeft))
                             multiplicationResult = operators.Pop().DoOperation(new double[] { valueLeft, doubleElement });
-                        else
+                        else //This should never happen, it's just a safety measure; the constructor will catch invalid expressions.
                             throw new ArgumentException("The formula" + stringRep + "found a missing operand for addition after declaring itself valid.");
 
                         if (multiplicationResult is double d)
                             doubleElement = d;
-                        else
+                        else //The multiplication resulted in an error.
                             return multiplicationResult;
                     }
 
@@ -271,6 +257,7 @@ namespace SpreadsheetUtilities
                 }
                 else if (element is FormulaOperator op)
                 {
+                    //The operator handels itself, keeping order of operations in mind.
                     if (!op.HandleStacks(values, operators, out OperatorError opError))
                     {
                         if (ReferenceEquals(opError, null))
@@ -279,7 +266,7 @@ namespace SpreadsheetUtilities
                         return opError.error;
                     }
                 }
-                else
+                else //This should never happen, it's just a safety measure; the constructor will catch invalid expressions.
                 {
                     throw new ArgumentException("The formula" + stringRep +  "found an unrecognized FormulaOperator " + element + " of type " + element.GetType() + ".");
                 }
@@ -289,10 +276,10 @@ namespace SpreadsheetUtilities
             {
                 OperatorError error = null;
                 if (!FormulaOperator.DoOperationIf<Additive>(values, operators, out object output))
-                {
+                { //This should never happen, it's just a safety measure; the constructor will catch invalid expressions.
                     throw new ArgumentException("The formula" + stringRep + " finished with an operator other than + or - after being validated");
                 }
-                else if (! FormulaOperator.GotDouble(output, values, ref error))
+                else if (! FormulaOperator.GotDouble(output, values, ref error)) //This should never happen, it's just a safety measure; addition can't return an error.
                 {
                     return error;
                 }
@@ -300,7 +287,7 @@ namespace SpreadsheetUtilities
 
             if (values.Count == 1 && operators.Count == 0)
                 return values.Pop();
-            else
+            else //This should never happen, it's just a safety measure; the constructor will catch invalid expressions.
                 throw new ArgumentException("The formula" + stringRep + " finished with excess operators or values. Is a left parenthesis missing a right pair?");
         }
 

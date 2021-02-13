@@ -78,6 +78,12 @@ namespace FormulaTests
             return SimpleTest(tokens, s => s, s => false, evaluation, s => 0);
         }
 
+        private static void ExpectFormulaError(string tokens, Func<string, string> normalizer, Func<string, bool> validator, Func<string, double> lookup)
+        {
+            Formula f = new Formula(tokens, normalizer, validator);
+            Assert.IsInstanceOfType(f.Evaluate(lookup), typeof(FormulaError));
+        }
+
         [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
         public void WhiteSpaceConstructor()
@@ -125,9 +131,18 @@ namespace FormulaTests
         public void DivisionByZeroConstructor()
         {
             Formula f = new Formula("6/0");
-            Assert.IsTrue(f.Evaluate(s => 0) is FormulaError);
+            Assert.IsInstanceOfType(f.Evaluate(s => 0), typeof(FormulaError));
             Assert.IsFalse(f.GetVariables().GetEnumerator().MoveNext());
             Assert.AreEqual("6/0", f.ToString());
+        }
+
+        [TestMethod]
+        public void DivisionByZeroParenthesisConstructor()
+        {
+            Formula f = new Formula(" 1 / (0)");
+            Assert.IsInstanceOfType(f.Evaluate(s => 0), typeof(FormulaError));
+            Assert.IsFalse(f.GetVariables().GetEnumerator().MoveNext());
+            Assert.AreEqual("1/(0)", f.ToString());
         }
 
         [TestMethod]
@@ -173,6 +188,16 @@ namespace FormulaTests
         }
 
         [TestMethod]
+        public void VariableDivisionByZero()
+        {
+            Func<string, double> lookup = s => 0;
+            Func<string, bool> validator = s => new Regex(@"^[A-Z]+\d+$").IsMatch(s);
+            Func<string, string> normalizer = s => s.ToUpper();
+
+            ExpectFormulaError("1 / a1", normalizer, validator, lookup);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
         public void IncompatibleVariableName()
         {
@@ -197,6 +222,98 @@ namespace FormulaTests
         public void UnrecognizedToken()
         {
             new Formula("(3 - 7)*12 - (4.2 + ;ibberish)", s => s, s => true);
+        }
+
+        [TestMethod]
+        public void SimpleEquals()
+        {
+            Func<string, double> lookup = s => Double.Parse(new Regex(@"\d+$").Match(s).Value);
+            Func<string, bool> validator = s => new Regex(@"^[A-Z]+\d+$").IsMatch(s);
+            Func<string, string> normalizer = s => s.ToUpper();
+
+            Formula f1 = SimpleTest("1 + 2 / (1 * (guac4 - 6))", normalizer, validator, 0 ,lookup);
+            Formula f2 = SimpleTest("1 + 4 / (1 * (guac4 - 6))", normalizer, validator, -1, lookup);
+            Formula f3 = SimpleTest("1 + 2 / (1 * (duck4 - 6))", normalizer, validator, 0, lookup);
+            Formula f4 = SimpleTest("1 + 2 / ((guac4 - 6) * 1)", normalizer, validator, 0, lookup);
+            Formula f5 = SimpleTest("  1+ 2 /   (1*(guac4-6 )   )", normalizer, validator, 0, lookup);
+
+            Assert.AreNotEqual(f1, f2);
+            Assert.AreNotEqual(f1.GetHashCode(), f2.GetHashCode());
+            Assert.AreNotEqual(f1, f3);
+            Assert.AreNotEqual(f1.GetHashCode(), f3.GetHashCode());
+            Assert.AreNotEqual(f1, f4);
+            Assert.AreNotEqual(f1.GetHashCode(), f4.GetHashCode());
+            Assert.AreEqual(f1, f5);
+            Assert.AreEqual(f1.GetHashCode(), f5.GetHashCode());
+            Assert.AreEqual(f1, f1);
+            Assert.AreEqual(f1.GetHashCode(), f1.GetHashCode());
+
+            Assert.IsFalse(f1 == f2);
+            Assert.IsFalse(f1 == f3);
+            Assert.IsFalse(f1 == f4);
+            Assert.IsTrue(f1 == f5);
+            Assert.IsTrue(f1 == f1);
+
+            Assert.IsTrue(f1 != f2);
+            Assert.IsTrue(f1 != f3);
+            Assert.IsTrue(f1 != f4);
+            Assert.IsFalse(f1 != f5);
+            Assert.IsFalse(f1 != f1);
+        }
+
+        [TestMethod]
+        public void NullEquals()
+        {
+            Func<string, double> lookup = s => Double.Parse(new Regex(@"\d+$").Match(s).Value);
+            Func<string, bool> validator = s => new Regex(@"^[A-Z]+\d+$").IsMatch(s);
+            Func<string, string> normalizer = s => s.ToUpper();
+
+            Formula f1 = SimpleTest("0 * ((93 - holdit147) * 89 - question2 / 80)", normalizer, validator, 0, lookup);
+            Formula f2 = null;
+            Formula f3 = null;
+
+            Assert.IsFalse(f1.Equals(f2));
+            Assert.IsFalse(f1 == f2);
+            Assert.IsFalse(f2 == f1);
+            Assert.IsTrue(f1 != f2);
+            Assert.IsTrue(f2 != f1);
+
+            Assert.IsTrue(f2 == f2);
+            Assert.IsTrue(f2 == f3);
+            Assert.IsFalse(f2 != f2);
+            Assert.IsFalse(f2 != f3);
+
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void BadStart()
+        {
+            new Formula(" / (1 - 3 + 1)");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void MissingBackOperand()
+        {
+            new Formula(" 1 + (2 -) * 3");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void MissingFrontOperand()
+        {
+            new Formula("42 / 7 + - 9");
+        }
+
+        [TestMethod]
+        public void MissingVariable()
+        {
+            Func<string, double> lookup = s => throw new ArgumentException("I don't know any variables :(");
+            Func<string, bool> validator = s => new Regex(@"^[A-Z]+\d+$").IsMatch(s);
+            Func<string, string> normalizer = s => s.ToUpper();
+
+            ExpectFormulaError("0 * ((93 - holdit147) * 89 - question2 / 80)", normalizer, validator, lookup);
         }
     }
 }

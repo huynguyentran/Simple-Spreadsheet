@@ -11,8 +11,6 @@ namespace SpreadsheetUtilities
         /// If two additive operators are next to each other, the leftmost operator is evaluated first
         /// <para>(this condenses operations of the same precedence).
         /// </summary>
-        /// <param name="values">The integer values processed thus far by the FunctionEvaluator.</param>
-        /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
         override public bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out OperatorError error)
         {
             error = null;
