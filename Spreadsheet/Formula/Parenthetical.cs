@@ -59,6 +59,7 @@ namespace SpreadsheetUtilities
 
         /// <summary>
         /// A right parenthesis looks for its partner left parenthesis in the operators stack.
+        /// It also initiates interior additive operations and exterior multiplicative operations.
         /// </summary>
         public override bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out OperatorError operationResult)
         {
@@ -68,7 +69,7 @@ namespace SpreadsheetUtilities
             {
                 return false;
             }
-
+            //Check for left parenthesis.
             HandleStacks(operators);
 
             if (DoOperationIf<Multiplicative>(values, operators, out object multiplicationResult)
@@ -80,6 +81,10 @@ namespace SpreadsheetUtilities
             return true;
         }
 
+        /// <summary>
+        /// Checks for a left parenthesis in the operator stack.
+        /// </summary>
+        /// <param name="operators">The operator stack.</param>
         public override void HandleStacks(Stack<FormulaOperator> operators)
         {
             if (operators.IsOnTop<FormulaOperator, LeftParenthesis>())

@@ -16,7 +16,7 @@ namespace SpreadsheetUtilities
             error = null;
 
             if (DoOperationIf<Additive>(values, operators, out object result)
-                && !GotDouble(result, values, ref error))
+                && !GotDouble(result, values, ref error)) //Check for errors from addition (there shouldn't be any).
                 return false;
             
             operators.Push(this);

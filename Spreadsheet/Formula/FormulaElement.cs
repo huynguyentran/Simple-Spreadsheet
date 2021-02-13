@@ -25,8 +25,8 @@ namespace SpreadsheetUtilities
         /// <returns>Whether the next token can follow this one.</returns>
         public bool CanFollow(FormulaElement next)
         {
-            foreach (Type acceptable in followers)
-                if (acceptable.IsInstanceOfType(next))
+            foreach (Type acceptable in followers) //Using IsInstanceOfType to consider inheritance,
+                if (acceptable.IsInstanceOfType(next)) //as opposed to followers.Contains(next.GetType())
                     return true;
             return false;
         }
@@ -38,7 +38,7 @@ namespace SpreadsheetUtilities
     class Value : FormulaElement
     {
         /// <summary>
-        /// Only additive, multiplicative, and right parenthesis operants
+        /// Only additive, multiplicative, and right parenthesis operands
         /// </summary>
         protected override HashSet<Type> followers
         {
@@ -46,7 +46,8 @@ namespace SpreadsheetUtilities
         }
 
         /// <summary>
-        /// The string representation of the value.
+        /// The string representation of the value: either a re-stringified double, or a
+        /// normalized variable name.
         /// </summary>
         private string stringRep;
 

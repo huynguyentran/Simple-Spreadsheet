@@ -54,6 +54,7 @@ namespace SpreadsheetUtilities
         /// <param name="values">The double values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
         /// <param name = "error">An error caused by the operation or null.</param>
+        /// <returns>If the operator successfully handeled the stacks (i.e. Were there any errors?).</returns>
         public virtual bool HandleStacks(Stack<double> values, Stack<FormulaOperator> operators, out OperatorError error)
         {
             error = null;
@@ -66,6 +67,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="values">The double values processed thus far by the FunctionEvaluator.</param>
         /// <param name="op">The operator to evaluate with the values's operands.</param>
+        /// <returns>A double, null, or a FormulaError.</returns>
         public static object DoOperationWith(Stack<double> values, FormulaOperator op)
         {
             if (values.TryPops(op.GetOperandCount(), out double[] operands))
@@ -82,6 +84,7 @@ namespace SpreadsheetUtilities
         /// <param name="values">The double values processed thus far by the FunctionEvaluator.</param>
         /// <param name="operators">The operators processed thus far by the FunctionEvaluator.</param>
         /// <paramref name="operationResult"/>The result of the operation.</param>
+        /// <returns>Whether the requested operator was on the top of the stack.</returns>
         public static bool DoOperationIf<T>(Stack<double> values, Stack<FormulaOperator> operators, out object operationResult) where T: FormulaOperator
         {
             operationResult = null;
@@ -102,7 +105,7 @@ namespace SpreadsheetUtilities
         /// <param name="error">The error, if an error results from the operation.</param>
         /// <returns>True if the result is a double;
         ///  false if the result is an error;
-        ///  an exception is thrown if the result is null.</returns>
+        ///  an exception is thrown if the result is null or anything else.</returns>
         public static bool GotDouble(object result, Stack<double> values, ref OperatorError error)
         {
             if (result is double d)

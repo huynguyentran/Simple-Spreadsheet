@@ -48,6 +48,9 @@ namespace SpreadsheetUtilities
 
     public class Formula
     {
+        /// <summary>
+        /// The representation of the formula as a string (used for ToString(), Equals(), HashCode()).
+        /// </summary>
         private string stringRep;
 
         private Func<string, string> normalizer;
@@ -64,6 +67,9 @@ namespace SpreadsheetUtilities
 
         private readonly HashSet<String> variables = new HashSet<string>();
 
+        /// <summary>
+        /// A list of the elements in the formula in the order that they appear (used in Evaluate).
+        /// </summary>
         private readonly LinkedList<FormulaElement> formulaElements = new LinkedList<FormulaElement>();
 
         /// <summary>
@@ -97,18 +103,17 @@ namespace SpreadsheetUtilities
             //Loop through all the tokens and determine whether it's a value or an operator.
             foreach(string token in GetTokens(formula))
             {
-                //tempToken will be the final string-ready version of the token.
+                //tempToken will be the final, string-ready version of the token.
                 string tempToken = token;
                 FormulaElement current = null;
 
-                if (IsValue(ref tempToken, valueConverters))
+                //tempToken is normalized in the IsValue method.
+                if (IsValue(ref tempToken, valueConverters)) 
                 {
-                    stringRep += tempToken;
                     current = new Value(tempToken);
                 }
                 else if(IsOperator(tempToken, out FormulaOperator op))
                 {
-                    stringRep += op.ToString();
                     current = op;
                     if (op is Parenthetical p)
                         p.HandleStacks(parentheses);
@@ -116,10 +121,12 @@ namespace SpreadsheetUtilities
                 else
                     throw new FormulaFormatException("Could not recognize token " + tempToken + ". Is this a misspelled variable?");
 
+                /* Check if the detected token is in a spot that makes sense.
+                 * (i.e. A ")" cannot come after a "+"), and a "/" cannot be at the start of an expression.
+                 */
                 bool isValidFollow = false;
                 string errorMessage;
 
-                //Check if the detected token is in a spot that makes sense.
                 if (formulaElements.Count == 0)
                 {
                     isValidFollow = (current is Value) || (current is LeftParenthesis);
@@ -135,14 +142,16 @@ namespace SpreadsheetUtilities
                         " cannot follow a " + last + " of type " + last.GetType() +". Is an operator missing an operand, or is there a value without an operator?";
                 }
 
+                //If everything checks out, the token can be added to the formula.
                 if (isValidFollow)
                 {
+                    stringRep += tempToken;
                     formulaElements.AddLast(current);
                 }
                 else
                     throw new FormulaFormatException(errorMessage);
             }
-            //Checks if all parentheses are accounted for.
+            //Checks if all parentheses pairs are accounted for.
             if (parentheses.Count > 0)
                 throw new FormulaFormatException(parentheses.Count + " left parentheses are missing right pairs. Do all parentheses have their pairs?");
             //A formula must have at least one token.
@@ -279,8 +288,8 @@ namespace SpreadsheetUtilities
                 { //This should never happen, it's just a safety measure; the constructor will catch invalid expressions.
                     throw new ArgumentException("The formula" + stringRep + " finished with an operator other than + or - after being validated");
                 }
-                else if (! FormulaOperator.GotDouble(output, values, ref error)) //This should never happen, it's just a safety measure; addition can't return an error.
-                {
+                else if (! FormulaOperator.GotDouble(output, values, ref error))
+                { //This should never happen, it's just a safety measure; addition can't return an error.
                     return error;
                 }
             }
@@ -346,7 +355,7 @@ namespace SpreadsheetUtilities
         {
             if (!(obj is Formula))
                 return false;
-
+            //Checking for null members just in case they somehow appear.
             string other = (obj as Formula).stringRep;
             if (ReferenceEquals(stringRep, null))
                 return ReferenceEquals(other, null);
