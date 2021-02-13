@@ -176,6 +176,11 @@ namespace FormulaTests
         [TestMethod]
         public void SimpleVariablesEvaluation()
         {
+            /*
+             * Variables are capital letters followed by digits. Letters are automatically capitalized.
+             * The value of the variable corresponds to the number made by its digits.
+             * e.g. ACDR64 has the value of 64.
+             */
             Func<string, double> lookup = s => Double.Parse(new Regex(@"\d+$").Match(s).Value);
             Func<string, bool> validator = s => new Regex(@"^[A-Z]+\d+$").IsMatch(s);
             Func<string, string> normalizer = s => s.ToUpper();
