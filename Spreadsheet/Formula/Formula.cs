@@ -53,7 +53,7 @@ namespace SpreadsheetUtilities
         private Func<string, string> normalizer;
         private Func<string, bool> validator;
 
-        private static readonly Regex variableRegex = new Regex(@"^[a-zA-Z_][a-zA-Z_0-9]*$");
+        private static readonly Regex variableRegex = new Regex(@"^[a-zA-Z_]\w*$");
         private static readonly FormulaOperator[] operators = new FormulaOperator[] {new Plus(), new Minus(), new Times(), new Divide(), new LeftParenthesis(), new RightParenthesis()};
 
         private readonly HashSet<String> variables = new HashSet<string>();
@@ -122,6 +122,8 @@ namespace SpreadsheetUtilities
                     if (op is Parenthetical p)
                         p.HandleStacks(parentheses);
                 }
+                else
+                    throw new FormulaFormatException("Could not recognize token " + tempToken + ". Is this a misspelled variable?");
 
                 bool isValidFollow = false;
                 string errorMessage;
@@ -284,8 +286,17 @@ namespace SpreadsheetUtilities
             }
 
             if (operators.Count == 1)
-                if (!FormulaOperator.DoOperationIf<Additive>(values, operators, out object error))
+            {
+                OperatorError error = null;
+                if (!FormulaOperator.DoOperationIf<Additive>(values, operators, out object output))
+                {
                     throw new ArgumentException("The formula" + stringRep + " finished with an operator other than + or - after being validated");
+                }
+                else if (! FormulaOperator.GotDouble(output, values, ref error))
+                {
+                    return error;
+                }
+            }
 
             if (values.Count == 1 && operators.Count == 0)
                 return values.Pop();

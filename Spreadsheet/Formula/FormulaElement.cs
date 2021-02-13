@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
+
 namespace SpreadsheetUtilities
 {
     abstract class FormulaElement
@@ -24,7 +25,7 @@ namespace SpreadsheetUtilities
     {
         protected override HashSet<Type> followers
         {
-            get{ return new HashSet<Type>() { typeof(Additive), typeof(Multiplicative) };}
+            get{ return new HashSet<Type>() { typeof(Additive), typeof(Multiplicative), typeof(RightParenthesis) };}
         }
 
 

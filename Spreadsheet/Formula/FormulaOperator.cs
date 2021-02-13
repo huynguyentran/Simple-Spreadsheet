@@ -89,7 +89,7 @@ namespace SpreadsheetUtilities
             return false;
         }
 
-        protected bool GotDouble(object result, Stack<double> values, ref OperatorError resultHolder)
+        public static bool GotDouble(object result, Stack<double> values, ref OperatorError resultHolder)
         {
             if (result is double d)
             {

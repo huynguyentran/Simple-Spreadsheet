@@ -44,7 +44,7 @@ namespace SpreadsheetUtilities
     {
         protected override HashSet<Type> followers
         {
-            get { return new HashSet<Type>() { typeof(Additive), typeof(Multiplicative) }; }
+            get { return new HashSet<Type>() { typeof(Additive), typeof(Multiplicative), typeof(RightParenthesis) }; }
         }
         public override string ToString()
         {
