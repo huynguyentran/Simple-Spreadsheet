@@ -184,21 +184,38 @@ namespace SS
         /// A helper for the GetCellsToRecalculate method.
         /// 
         ///   -- You should fully comment what is going on below --
+        ///   
+        /// Visit recursively performs a depth-first search of the dependency graph
+        /// starting from cell "start" by traversing dependent relationships (i.e. what
+        /// depends on start? What depends on what depends on start?).
+        /// 
+        /// If the method detects a cycle, it throws a CircularException.
         /// </summary>
+        /// <param name="start">The name of the starting cell.</param>
+        /// <param name="name">The name of the current cell being visited.</param>
+        /// <param name="visited">A set of all the cells that have been visited.</param>
+        /// <param name="changed">A list of all the cells that have new values because start was chenged.</param>
         private void Visit(string start, string name, ISet<string> visited, LinkedList<string> changed)
         {
+            //Add the current cell to visited because it is being visited.
             visited.Add(name);
+            //Look at all the cells that depend on our current cell.
             foreach (string n in GetDirectDependents(name))
             {
+                //If any of the dependent cells are the starting cell, we've completed a cycle.
                 if (n.Equals(start))
                 {
                     throw new CircularException();
-                }
+                } //If any of the dependent cells are unvisited, we must visit them as well.
                 else if (!visited.Contains(n))
                 {
                     Visit(start, n, visited, changed);
                 }
             }
+            /* Adding the current cell to the top of changed once all its
+             * dependents have been explored ensures that direct / primary dependencies 
+             * are first, then secondary dependencies, and so on.
+             */
             changed.AddFirst(name);
         }
 
