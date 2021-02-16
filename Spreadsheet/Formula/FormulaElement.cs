@@ -30,6 +30,24 @@ namespace SpreadsheetUtilities
                     return true;
             return false;
         }
+
+        /// <summary>
+        /// Checks if this formula element can start a formula.
+        /// </summary>
+        /// <returns>Whether this formula element can start a formula.</returns>
+        public virtual bool CanStart()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if this formula element can end a formula.
+        /// </summary>
+        /// <returns>Whether this formula element can end a formula.</returns>
+        public virtual bool CanEnd()
+        {
+            return true;
+        }
     }
 
     /// <summary>

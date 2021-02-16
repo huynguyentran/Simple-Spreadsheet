@@ -129,7 +129,7 @@ namespace SpreadsheetUtilities
 
                 if (formulaElements.Count == 0)
                 {
-                    isValidFollow = (current is Value) || (current is LeftParenthesis);
+                    isValidFollow = current.CanStart();
                     errorMessage = "A " + current + " of type " + current.GetType() + 
                         " cannot start a formula. Is a value missing at the beginning?";
                 }
@@ -157,6 +157,11 @@ namespace SpreadsheetUtilities
             //A formula must have at least one token.
             if (formulaElements.Count < 0 || stringRep == "")
                 throw new FormulaFormatException("No tokens were detected. Are you sure anything is written?");
+
+            FormulaElement finish = formulaElements.Last.Value;
+
+            if (!finish.CanEnd())
+                throw new FormulaFormatException("The formula element " + finish + " of type " + finish.GetType() + " cannot finish a formula.");
         }
 
         /// <param name="token">The token to identify (it will take the normalized form once the method is done).</param>

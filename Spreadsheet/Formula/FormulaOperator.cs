@@ -62,6 +62,16 @@ namespace SpreadsheetUtilities
             return true;
         }
 
+        public override bool CanStart()
+        {
+            return false;
+        }
+
+        public override bool CanEnd()
+        {
+            return false;
+        }
+
         /// <summary>
         /// Performs an operator's function on the most recent values extracted by the FunctionEvaluator.
         /// </summary>

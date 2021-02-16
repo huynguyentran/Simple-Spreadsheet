@@ -37,6 +37,11 @@ namespace SpreadsheetUtilities
             return "(";
         }
 
+        public override bool CanStart()
+        {
+            return true;
+        }
+
         public override void HandleStacks(Stack<FormulaOperator> operators)
         {
             operators.Push(this);
@@ -55,6 +60,11 @@ namespace SpreadsheetUtilities
         public override string ToString()
         {
             return ")";
+        }
+
+        public override bool CanEnd()
+        {
+            return true;
         }
 
         /// <summary>
