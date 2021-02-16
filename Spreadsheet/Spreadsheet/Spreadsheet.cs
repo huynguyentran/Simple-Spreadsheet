@@ -5,8 +5,13 @@ using System.Text;
 
 namespace SS
 {
-    class Spreadsheet : AbstractSpreadsheet
+    public class Spreadsheet : AbstractSpreadsheet
     {
+        public Spreadsheet()
+        {
+
+        }
+
         public override object GetCellContents(string name)
         {
             throw new NotImplementedException();
