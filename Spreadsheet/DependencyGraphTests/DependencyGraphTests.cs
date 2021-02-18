@@ -313,7 +313,7 @@ namespace DevelopmentTests
             dg.AddDependency("Blender", "Unity");
 
             Assert.AreEqual(4, dg.Size);
-            Assert.AreEqual(0, dg["me"]);
+            Assert.AreEqual(3, dg["me"]);
             Assert.AreEqual(1, dg["Unity"]);
             Assert.IsFalse(dg.HasDependents("me"));
             Assert.IsTrue(dg.HasDependents("Taco Del Mar"));
@@ -340,7 +340,7 @@ namespace DevelopmentTests
 
         private void TestNode(DependencyGraph dg, string node, string[] dependents, string[] dependees)
         {
-            Assert.AreEqual(dependents.Length, dg[node]);
+            Assert.AreEqual(dependees.Length, dg[node]);
 
             Assert.AreEqual(dependents.Length > 0, dg.HasDependents(node));
             Assert.AreEqual(dependees.Length > 0, dg.HasDependees(node));

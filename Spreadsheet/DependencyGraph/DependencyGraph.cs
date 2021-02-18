@@ -149,7 +149,15 @@ namespace SpreadsheetUtilities
         public void RemoveDependency(string s, string t)
         {
             if (dependents.ContainsKey(s) && dependents[s].Remove(t) && dependees.ContainsKey(t) && dependees[t].Remove(s))
+            {
                 pairCount--;
+
+                if (dependents[s].Count < 1)
+                    dependents.Remove(s);
+
+                if (dependees[t].Count < 1)
+                    dependees[t].Remove(t);
+            }
         }
 
 
