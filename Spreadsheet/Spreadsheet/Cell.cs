@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SS
 {
-    public class Cell<T>
+    public class Cell
     {
         private object _contents;
 
@@ -21,14 +21,23 @@ namespace SS
             }
         }
 
-        public Cell(T c)
+        public Cell(object c)
         {
+            if (ReferenceEquals(c, null))
+                throw new ArgumentNullException("Cannot have a cell with a null value.");
             Contents = c;
         }
 
-        public T GetCastContents()
+
+        public bool CanCast<T>(out T casted)
         {
-            return (T) Contents;
+            casted = default(T);
+            if (Contents is T t)
+            {
+                casted = t;
+                return true;
+            }
+            return false;
         }
     }
 }
