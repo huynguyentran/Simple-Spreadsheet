@@ -12,7 +12,7 @@ namespace SS
 
         private Dictionary<string, Cell> cells;
 
-        private KeyValuePair<string, IEnumerable<string>> changedCell;
+        private KeyValuePair<string, HashSet<string>> changedCell;
 
         public Spreadsheet()
         {
@@ -48,7 +48,7 @@ namespace SS
         public override IList<string> SetCellContents(string name, Formula formula)
         {
             if (formula == null)
-                throw new ArgumentException("Cannot use a null formula as a value for a cell.");
+                throw new ArgumentNullException("Cannot use a null formula as a value for a cell.");
 
             return AddCell(name, formula, formula.GetVariables());
         }
@@ -57,11 +57,11 @@ namespace SS
         {
             CheckName(name);
 
-            changedCell = new KeyValuePair<string, IEnumerable<string>>(name, newDependees);
+            changedCell = new KeyValuePair<string, HashSet<string>>(name, new HashSet<string>(newDependees));
 
             IList<string> toRecalculate = new List<string>(GetCellsToRecalculate(name));
 
-            dependencies.ReplaceDependents(name, changedCell.Value);
+            dependencies.ReplaceDependees(name, changedCell.Value);
             cells.Remove(name);
             cells[name] = new Cell(cont);
 
@@ -75,9 +75,12 @@ namespace SS
 
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            if (changedCell.Key == name)
-                return changedCell.Value;
-            return dependencies.GetDependents(name);
+            List<string> dependents = new List<string>(dependencies.GetDependents(name));
+
+            if (changedCell.Value.Contains(name))
+                dependents.Add(changedCell.Key);
+
+            return dependents;
         }
 
         private static bool IsValidName(string name)

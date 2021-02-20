@@ -67,6 +67,24 @@ namespace SpreadsheetTests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void NullString()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            string value = null;
+            s.SetCellContents("Oh_this_is_bad", value);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void NullFormula()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            Formula value = null;
+            s.SetCellContents("Zut_alors", value);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(CircularException))]
         public void SmallestCycle()
         {
@@ -151,6 +169,106 @@ namespace SpreadsheetTests
             AbstractSpreadsheet s = BasicContentsTest(d);
 
             Assert.AreEqual("", s.GetCellContents("thi5_1s_n0t_4_r3gisered_ce1l"));
+        }
+
+        private void CheckRecalculateList(HashSet<string>[] expected, IList<string> output)
+        {
+            int i = 0;
+
+            foreach(string dependence in output)
+            {
+                if (!expected[i].Remove(dependence))
+                    Assert.Fail("Unexpected dependence " + dependence + " at level " + i + ".");
+
+                while (i < expected.Length && expected[i].Count == 0) { i++; }
+            }
+
+            if (!(i == expected.Length && expected[expected.Length - 1].Count == 0))
+                Assert.Fail("Not all dependencies were found.");
+        }
+
+        private void CheckRecalculateList(string expected, IList<string> output)
+        {
+            Assert.AreEqual(1, output.Count);
+            Assert.AreEqual(expected, output[0]);
+        }
+
+        [TestMethod]
+        public void CorrectCellsToRecalculate()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            IList<string> list =  s.SetCellContents("a1", 43);
+            CheckRecalculateList("a1", list);
+
+            list = s.SetCellContents("b2", new Formula("a1 + 3"));
+            CheckRecalculateList("b2", list);
+
+            list = s.SetCellContents("c3", new Formula("a1 - 2"));
+            CheckRecalculateList("c3", list);
+
+            list = s.SetCellContents("a1", 49);
+            Assert.AreEqual(3, list.Count);
+            CheckRecalculateList(new HashSet<string>[] { new HashSet<string>() {"a1"}, new HashSet<string>() { "b2", "c3" } }, list);
+
+            list = s.SetCellContents("d4", new Formula("b2 - c3"));
+            CheckRecalculateList("d4", list);
+
+            HashSet<string>[] nextDependents = new HashSet<string>[] { new HashSet<string>() {"a1"}, 
+                new HashSet<string>() { "b2","c3" },
+                new HashSet<string>() {"d4"}};
+
+            list = s.SetCellContents("a1", new Formula("c9 - goober"));
+            CheckRecalculateList(nextDependents, list);
+
+            nextDependents = new HashSet<string>[] { new HashSet<string>() {"b2"},
+                new HashSet<string>() {"d4"}};
+
+            list = s.SetCellContents("b2", new Formula("a1 * c3"));
+            CheckRecalculateList(nextDependents, list);
+
+            nextDependents = new HashSet<string>[] { new HashSet<string>() {"c3"},
+                new HashSet<string>() {"d4", "b2"}};
+
+            list = s.SetCellContents("c3", new Formula("goober - c9"));
+            CheckRecalculateList(nextDependents, list);
+
+            nextDependents = new HashSet<string>[] { new HashSet<string>() {"a1"},
+                new HashSet<string>() {"b2"},
+                new HashSet<string>() {"d4"}};
+
+            list = s.SetCellContents("a1", "this is the end of the test");
+            CheckRecalculateList(nextDependents, list);
+        }
+
+        [TestMethod]
+        public void SpreadsheetKeepsFormAfterCircularException()
+        {
+            Dictionary<string, object> cells = new Dictionary<string, object>();
+            cells.Add("a1", new Formula("a2 + a9"));
+            cells.Add("a2", new Formula("b1 - 3"));
+            cells.Add("a9", new Formula("b2 * b1"));
+            AbstractSpreadsheet s = MakeSpreadsheet(cells);
+            bool noError = true;
+
+            HashSet<string>[] nextDependents = new HashSet<string>[] { new HashSet<string>() {"b2"},
+                new HashSet<string>() { "a9" },
+                new HashSet<string>() {"a1"}};
+
+            try
+            {
+                s.SetCellContents("b1", new Formula("a1"));
+            }
+            catch(CircularException c)
+            {
+                noError = false;
+                CheckRecalculateList("a1", s.SetCellContents("a1", new Formula("a2 + a9")));
+                CheckRecalculateList(nextDependents, s.SetCellContents("b2", 3));
+
+                Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("b1"));
+            }
+
+            if (noError)
+                Assert.Fail("Expected a CircularException, got none.");
         }
     }
 }
