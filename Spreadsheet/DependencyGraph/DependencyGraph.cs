@@ -39,6 +39,7 @@ namespace SpreadsheetUtilities
     //     dependees("c") = {"a"}
     //     dependees("d") = {"b", "d"}
     /// </summary>
+    /// <author>William Erignac</author>
     public class DependencyGraph
     {
         /// <summary>
