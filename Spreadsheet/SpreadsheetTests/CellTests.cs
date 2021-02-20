@@ -6,6 +6,8 @@ using System;
 
 namespace SpreadsheetTests
 {
+    /// <author>William Erignac</author>
+    /// <version>2/19/2021</version>
     [TestClass]
     public class CellTests
     {

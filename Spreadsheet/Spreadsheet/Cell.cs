@@ -7,6 +7,8 @@ namespace SS
     /// <summary>
     /// Holds the contents of a single spreadsheet slot.
     /// </summary>
+    /// <author>William Erignac</author>
+    /// <version>2/19/2021</version>
     public class Cell
     {
         /// <summary>
