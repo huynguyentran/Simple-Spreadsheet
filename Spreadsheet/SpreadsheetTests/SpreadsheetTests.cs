@@ -165,6 +165,8 @@ namespace SpreadsheetTests
             d.Add("pi", 3.1415);
             d.Add("e", 2.7);
             d.Add("i", "sqrt(-1)");
+            d.Add("circumference", new Formula("2*pi*radius"));
+            d.Add("area", new Formula("circumference*circumference/(4*pi)"));
 
             AbstractSpreadsheet s = BasicContentsTest(d);
 
@@ -269,6 +271,38 @@ namespace SpreadsheetTests
 
             if (noError)
                 Assert.Fail("Expected a CircularException, got none.");
+        }
+
+        [TestMethod]
+        public void AddingEmptyCell()
+        {
+            Dictionary<string, object> cells = new Dictionary<string, object>();
+            cells.Add("a1", new Formula("c3 + b2"));
+            cells.Add("c3", new Formula("d4 * 2"));
+            cells.Add("b2", new Formula("e5 * 2"));
+            cells.Add("e5", new Formula("d4 * variable"));
+
+            AbstractSpreadsheet s = MakeSpreadsheet(cells);
+
+            HashSet<string>[] nextDependents = new HashSet<string>[]
+            {
+                new HashSet<string>() {"d4"},
+                new HashSet<string>() {"e5", "c3","a1", "b2"}
+            };
+
+            CheckRecalculateList(nextDependents, s.SetCellContents("d4", 3));
+
+            nextDependents = new HashSet<string>[]
+            {
+                new HashSet<string>() {"b2"},
+                new HashSet<string>() {"a1"}
+            };
+
+            CheckRecalculateList(nextDependents, s.SetCellContents("b2", ""));
+            Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("b2"));
+
+            CheckRecalculateList("e5", s.SetCellContents("e5", ""));
+            Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("e5"));
         }
     }
 }
