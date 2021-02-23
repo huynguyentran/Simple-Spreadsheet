@@ -5,6 +5,9 @@ using FormulaEvaluator;
 
 namespace FormulaEvaluatorTester
 {
+    /// <summary>
+    /// A class that tests the FormulaEvaluator Class through the command prompt.
+    /// </summary>
     static class Tester
     {
         private delegate void TestSet();
