@@ -29,7 +29,12 @@ namespace SS
         /// </summary>
         private KeyValuePair<string, HashSet<string>> changedCell;
 
-        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
+        /// <summary>
+        /// Whether this spreadsheet has been changed since construction or saving.
+        /// </summary>
+        private bool _changed = false;
+
+        public override bool Changed { get => _changed; protected set => _changed = value; }
 
         /// <summary>
         /// Creates an empty spreadsheet.
@@ -152,6 +157,9 @@ namespace SS
             cells.Remove(name);
             cells[name] = new Cell(cont);
 
+            if (!Changed)
+                Changed = true;
+
             return toRecalculate;
         }
 
@@ -208,6 +216,7 @@ namespace SS
 
         public override void Save(string filename)
         {
+            Changed = false;
             throw new NotImplementedException();
         }
 
