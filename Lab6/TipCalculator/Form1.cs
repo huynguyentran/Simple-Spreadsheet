@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace TipCalculator
 {
@@ -22,7 +23,7 @@ namespace TipCalculator
 
         }
 
-        private void copmuteTipButton_Click(object sender, EventArgs e)
+        private void ComputeTip()
         {
             string billStr = totalBillBox.Text;
 
@@ -30,7 +31,7 @@ namespace TipCalculator
             {
                 if (Double.TryParse(tipBox.Text, out double tip))
                 {
-                    double tipTotal = d * tip;
+                    double tipTotal = d * (tip/100d);
                     billStr = tipTotal.ToString();
                     totalWithTipBox.Text = (d + tipTotal).ToString();
                 }
@@ -47,12 +48,12 @@ namespace TipCalculator
 
         private void totalBillBox_TextChanged(object sender, EventArgs e)
         {
-            UpdateInput("bill", Double.TryParse(totalBillBox.Text, out double d));
+            UpdateInput("bill", Regex.IsMatch(totalBillBox.Text, @"^[\d]+(.[\d]{1,2})?$"));
         }
 
         private void tipBox_TextChanged(object sender, EventArgs e)
         {
-            UpdateInput("tip", Double.TryParse(tipBox.Text, out double d));
+            UpdateInput("tip", Regex.IsMatch(tipBox.Text, @"^[\d]{1,2}$"));
         }
 
         private Dictionary<string, bool> inputsValid;
@@ -69,7 +70,8 @@ namespace TipCalculator
             inputsValid.Remove(inputName);
             inputsValid[inputName] = status;
 
-            computeTipButton.Enabled = CheckAllInputsReady();
+            if (CheckAllInputsReady())
+                ComputeTip();
         }
 
         private bool CheckAllInputsReady()
@@ -85,6 +87,11 @@ namespace TipCalculator
             }
 
             return ready;
+        }
+
+        private void bottomTextBox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
