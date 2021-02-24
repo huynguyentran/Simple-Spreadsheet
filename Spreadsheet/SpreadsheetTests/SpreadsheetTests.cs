@@ -67,19 +67,40 @@ namespace SpreadsheetTests
             string formStr = "=b2 + 0.3";
             cell = "c3";
             s.SetContentsOfCell(cell, formStr);
-            CheckCell(s, cell, new Formula(formStr), 3.1d);
+            CheckCell(s, cell, new Formula(formStr.Substring(1)), 3.1d);
 
             string noVarStr = "=burrito9 - 2";
             cell = "d4";
             s.SetContentsOfCell(cell, noVarStr);
-            CheckCell(s, cell, new Formula(noVarStr), new FormulaError());
+            CheckCell(s, cell, new Formula(noVarStr.Substring(1)), new FormulaError());
 
             string zeroDiv = "=25 / (1 - 3 / 3)";
             cell = "e5";
             s.SetContentsOfCell(cell, zeroDiv);
-            CheckCell(s, cell, new Formula(zeroDiv), new FormulaError());
+            CheckCell(s, cell, new Formula(zeroDiv.Substring(1)), new FormulaError());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void InvalidCellName()
+        {
+            AbstractSpreadsheet s = new Spreadsheet(rowColFormat, upperCase, "irrelevant");
+            s.SetContentsOfCell("Portal", "the cake is a lie");
         }
         
+        [TestMethod]
+        public void NormalizerWorks()
+        {
+            AbstractSpreadsheet s = new Spreadsheet(rowColFormat, upperCase, "irrelevant");
+            s.SetContentsOfCell("a1", 3d.ToString());
+            CheckCell(s, "A1", 3d);
+
+            string formStr = "=a1*2";
+
+            s.SetContentsOfCell("b2", formStr);
+            CheckCell(s, "B2", new Formula(formStr.Substring(1)), 6d);
+        }
+
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void NullNameDouble()
