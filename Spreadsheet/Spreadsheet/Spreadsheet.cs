@@ -29,6 +29,8 @@ namespace SS
         /// </summary>
         private KeyValuePair<string, HashSet<string>> changedCell;
 
+        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
+
         /// <summary>
         /// Creates an empty spreadsheet.
         /// </summary>
@@ -197,6 +199,26 @@ namespace SS
         {
             if (!IsValidName(name))
                 throw new InvalidNameException();
+        }
+
+        public override string GetSavedVersion(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Save(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object GetCellValue(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IList<string> SetContentsOfCell(string name, string content)
+        {
+            throw new NotImplementedException();
         }
     }
 }
