@@ -70,7 +70,7 @@ namespace SS
         /// <param name="name">The name of the cell to set the contents of.</param>
         /// <param name="number">The double to set the cell's contents to.</param>
         /// <returns>All the cells that need to be updated now that this cell has been modified.</returns>
-        public override IList<string> SetCellContents(string name, double number)
+        protected override IList<string> SetCellContents(string name, double number)
         {
             return AddCell(name, number);
         }
@@ -81,7 +81,7 @@ namespace SS
         /// <param name="name">The name of the cell to set the contents of.</param>
         /// <param name="text">The string to set the cell's contents to.</param>
         /// <returns>All the cells that need to be updated now that this cell has been modified.</returns>
-        public override IList<string> SetCellContents(string name, string text)
+        protected override IList<string> SetCellContents(string name, string text)
         {
             IList<string> toRecalculate = AddCell(name, text);
 
@@ -101,7 +101,7 @@ namespace SS
         /// <param name="name">The name of the cell to set the contents of.</param>
         /// <param name="formula">The formula to set the cell's contents to.</param>
         /// <returns>All the cells that need to be updated now that this cell has been modified.</returns>
-        public override IList<string> SetCellContents(string name, Formula formula)
+        protected override IList<string> SetCellContents(string name, Formula formula)
         {
             if (formula == null)
                 throw new ArgumentNullException("Cannot use a null formula as a value for a cell.");
