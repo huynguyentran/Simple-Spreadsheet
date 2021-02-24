@@ -32,10 +32,27 @@ namespace SS
         /// <summary>
         /// Creates an empty spreadsheet.
         /// </summary>
-        public Spreadsheet()
+        public Spreadsheet() : base(s => true, s => s, "default")
         {
             dependencies = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
+        }
+
+        /// <summary>
+        /// Creates an empty spreadsheet with the specified validator, normalizer, and version.
+        /// </summary>
+        public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
+        {
+            dependencies = new DependencyGraph();
+            cells = new Dictionary<string, Cell>();
+        }
+
+        public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version)
+            : base(isValid, normalize, version)
+        {
+            dependencies = new DependencyGraph();
+            cells = new Dictionary<string, Cell>();
+            
         }
 
         /// <summary>
