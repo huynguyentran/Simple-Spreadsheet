@@ -349,18 +349,25 @@ namespace SS
         /// </summary>
         private void Visit(string start, string name, ISet<string> visited, LinkedList<string> changed)
         {
+            //Add the current cell to visited because it is being visited.
             visited.Add(name);
+            //Look at all the cells that depend on our current cell.
             foreach (string n in GetDirectDependents(name))
             {
+                //If any of the dependent cells are the starting cell, we've completed a cycle.
                 if (n.Equals(start))
                 {
                     throw new CircularException();
-                }
+                } //If any of the dependent cells are unvisited, we must visit them as well.
                 else if (!visited.Contains(n))
                 {
                     Visit(start, n, visited, changed);
                 }
             }
+            /* Adding the current cell to the top of changed once all its
+             * dependents have been explored ensures that direct / primary dependencies 
+             * are first, then secondary dependencies, and so on.
+             */
             changed.AddFirst(name);
         }
 
