@@ -12,7 +12,7 @@ namespace SpreadsheetTests
     [TestClass]
     public class SpreadsheetTests
     {
-        private readonly Func<string, bool> rowColFormat = s => Regex.IsMatch(s, @"^[a-zA-Z]+[0-9]+$");
+        private readonly Func<string, bool> rowColFormat = s => Regex.IsMatch(s, @"^[A-Z]+[0-9]+$");
         private readonly Func<string, string> upperCase = s => s.ToUpper();
 
         [TestMethod]
@@ -26,6 +26,23 @@ namespace SpreadsheetTests
             Assert.IsTrue(s.IsValid("= This doesn't aCtually chECk anything... )*+"));
             string contents = "noTHing c4n haPpen t0 m3";
             Assert.AreEqual(contents, s.Normalize(contents));
+            Assert.AreEqual("default", s.Version);
+            Assert.IsFalse(s.Changed);
+        }
+
+        [TestMethod]
+        public void ThreeParameterConstructor()
+        {
+            AbstractSpreadsheet s = new Spreadsheet(rowColFormat, upperCase, "relevant");
+            Assert.AreEqual("", s.GetCellContents("arbitrary"));
+            IEnumerator<string> e = s.GetNamesOfAllNonemptyCells().GetEnumerator();
+            Assert.IsFalse(e.MoveNext());
+
+            Assert.IsFalse(s.IsValid("thisTimeItChecks"));
+            Assert.IsTrue(s.IsValid("ARC9897"));
+            string contents = "something will happen";
+            Assert.AreEqual("SOMETHING WILL HAPPEN", s.Normalize(contents));
+            Assert.AreEqual("relevant", s.Version);
             Assert.IsFalse(s.Changed);
         }
 
