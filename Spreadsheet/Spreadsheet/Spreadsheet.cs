@@ -9,7 +9,7 @@ namespace SS
     /// A spreadsheet that keeps track of the contents and relations of cells.
     /// </summary>
     /// <author>Wiliam Erignac</author>
-    /// <version>2/19/2021</version>
+    /// <version>2/24/2021</version>
     public class Spreadsheet : AbstractSpreadsheet
     {
         /// <summary>
