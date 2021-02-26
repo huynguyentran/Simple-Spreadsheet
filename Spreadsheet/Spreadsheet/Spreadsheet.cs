@@ -36,7 +36,7 @@ namespace SS
 
         public override bool Changed { get => _changed; protected set => _changed = value; }
 
-        private SpreadsheetFileManager manager;
+        private SpreadsheetFileManager manager = new SpreadsheetXMLManager();
 
         /// <summary>
         /// Creates an empty spreadsheet.
@@ -61,12 +61,13 @@ namespace SS
         {
             dependencies = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
-            
+
+            manager.Load(this, filepath);
         }
 
         /// <summary>
         /// Gets the contents of a cell using the cell's name.
-        /// By default, an empty string is resturned as the contents of the cell.
+        /// By default, an empty string is returned as the contents of the cell.
         /// </summary>
         /// <param name="name">The name of the cell.</param>
         /// <returns>The contents of the cell.</returns>
