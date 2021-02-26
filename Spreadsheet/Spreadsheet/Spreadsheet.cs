@@ -283,6 +283,10 @@ namespace SS
             else
                 cellsToUpdate = SetCellContents(name, content);
 
+            foreach(string relatedCellName in cellsToUpdate)
+                if (TryGetCell(relatedCellName, out Cell relatedCell))
+                    relatedCell.UpdateValue();
+
             return cellsToUpdate;
         }
     }
