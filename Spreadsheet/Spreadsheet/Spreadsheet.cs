@@ -142,8 +142,6 @@ namespace SS
         /// <returns>All the cells that need to be updated now that this cell has been added.</returns>
         private IList<string> AddCell(string name, object cont, IEnumerable<string> newDependees)
         {
-            name  = CheckName(name);
-
             /* Use changedCell to avoid putting the spreadsheet into an illegal state. 
              * (i.e. We only know whether adding this cell will result in a cycle once
              * we run GetCellsToRecalculate, which will stop this method).
@@ -238,7 +236,21 @@ namespace SS
 
         public override IList<string> SetContentsOfCell(string name, string content)
         {
-            throw new NotImplementedException();
+            if (ReferenceEquals(content, null))
+                throw new ArgumentException("Content of a cell cannot be null");
+
+            name = CheckName(name);
+
+            IList<string> cellsToUpdate;
+
+            if (Double.TryParse(content, out double d))
+                cellsToUpdate = SetCellContents(name, d);
+            else if (content.Length > 0 && content[0].Equals('='))
+                cellsToUpdate = SetCellContents(name, new Formula(content.Substring(1)));
+            else
+                cellsToUpdate = SetCellContents(name, content);
+
+            return cellsToUpdate;
         }
     }
 }
