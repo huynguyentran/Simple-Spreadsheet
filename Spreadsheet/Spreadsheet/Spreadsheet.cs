@@ -179,7 +179,11 @@ namespace SS
         /// <returns>The direct dependents of the node.</returns>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            List<string> dependents = new List<string>(dependencies.GetDependents(name));
+            /* Using HashSet to avoid getting two instances of the same
+             * cell name after the if statement.
+             */
+
+            HashSet<string> dependents = new HashSet<string>(dependencies.GetDependents(name));
 
             if (changedCell.Value.Contains(name))
                 dependents.Add(changedCell.Key);
