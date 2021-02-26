@@ -70,12 +70,31 @@ namespace SS
         /// <returns>The contents of the cell.</returns>
         public override object GetCellContents(string name)
         {
-            name = CheckName(name);
-
-            if (cells.TryGetValue(name, out Cell cell))
+            if (TryGetCell(name, out Cell cell))
                 return cell.Contents;
             else
                 return "";
+        }
+
+        public override object GetCellValue(string name)
+        {
+            if (TryGetCell(name, out Cell cell))
+                return cell.Value;
+            else
+                return "";
+        }
+
+        private bool TryGetCell(string name, out Cell cell)
+        {
+            cell = null;
+            name = CheckName(name);
+
+            if (cells.TryGetValue(name, out Cell c))
+            {
+                cell = c;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -130,7 +149,16 @@ namespace SS
             if (formula == null)
                 throw new ArgumentNullException("Cannot use a null formula as a value for a cell.");
 
-            return AddCell(name, formula, formula.GetVariables());
+            return AddCell(name, formula, formula.GetVariables(), LookupCellValue);
+        }
+
+        private double LookupCellValue(string name)
+        {
+            object value = GetCellValue(name);
+            if (value is double d)
+                return d;
+            else
+                throw new ArgumentException("Cell " + name + " needs to provide a double value but has the value " + value + " of type " + value.GetType() +".");
         }
 
         /// <summary>
@@ -140,7 +168,7 @@ namespace SS
         /// <param name="cont">The contents of the cell to add.</param>
         /// <param name="newDependees">The cells this cell will depend on.</param>
         /// <returns>All the cells that need to be updated now that this cell has been added.</returns>
-        private IList<string> AddCell(string name, object cont, IEnumerable<string> newDependees)
+        private IList<string> AddCell(string name, object cont, IEnumerable<string> newDependees, Func<string, double> lookup)
         {
             /* Use changedCell to avoid putting the spreadsheet into an illegal state. 
              * (i.e. We only know whether adding this cell will result in a cycle once
@@ -153,7 +181,13 @@ namespace SS
             //Now that we know the cell is good to add, we add it to the Spreadsheet.
             dependencies.ReplaceDependees(name, changedCell.Value);
             cells.Remove(name);
-            cells[name] = new Cell(cont);
+            Cell newCell;
+            if (!ReferenceEquals(lookup, null))
+                newCell = new Cell(cont, lookup);
+            else
+                newCell = new Cell(cont);
+
+            cells[name] = newCell;
 
             if (!Changed)
                 Changed = true;
@@ -169,7 +203,7 @@ namespace SS
         /// <returns>All the cells that need to be updated now that this cell has been added.</returns>
         private IList<string> AddCell(string name, object cont)
         {
-            return AddCell(name, cont, new string[0]);
+            return AddCell(name, cont, Array.Empty<string>(), null);
         }
 
         /// <summary>
@@ -230,11 +264,6 @@ namespace SS
         public override void Save(string filename)
         {
             Changed = false;
-            throw new NotImplementedException();
-        }
-
-        public override object GetCellValue(string name)
-        {
             throw new NotImplementedException();
         }
 

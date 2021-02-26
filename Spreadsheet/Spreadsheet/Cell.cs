@@ -38,7 +38,7 @@ namespace SS
         /// Creates a cell with non-null contents.
         /// </summary>
         /// <param name="c">The contents of the cell.</param>
-        public Cell(Formula f, Func<string, double> l)
+        public Cell(object f, Func<string, double> l)
         {
             if (ReferenceEquals(f, null))
                 throw new ArgumentNullException("Cannot have a cell with a null content.");
