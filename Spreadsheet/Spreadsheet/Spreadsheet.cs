@@ -36,6 +36,8 @@ namespace SS
 
         public override bool Changed { get => _changed; protected set => _changed = value; }
 
+        private SpreadsheetFileManager manager;
+
         /// <summary>
         /// Creates an empty spreadsheet.
         /// </summary>
