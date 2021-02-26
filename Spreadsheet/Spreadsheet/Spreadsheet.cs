@@ -273,7 +273,7 @@ namespace SS
         public override IList<string> SetContentsOfCell(string name, string content)
         {
             if (ReferenceEquals(content, null))
-                throw new ArgumentException("Content of a cell cannot be null");
+                throw new ArgumentNullException("Content of a cell cannot be null");
 
             name = CheckName(name);
 

@@ -34,7 +34,7 @@ namespace SpreadsheetTests
         public void ThreeParameterConstructor()
         {
             AbstractSpreadsheet s = new Spreadsheet(rowColFormat, upperCase, "relevant");
-            Assert.AreEqual("", s.GetCellContents("arbitrary"));
+            Assert.AreEqual("", s.GetCellContents("arbitrary8"));
             IEnumerator<string> e = s.GetNamesOfAllNonemptyCells().GetEnumerator();
             Assert.IsFalse(e.MoveNext());
 
