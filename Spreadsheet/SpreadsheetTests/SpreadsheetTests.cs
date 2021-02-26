@@ -175,13 +175,13 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("Oh_this_is_bad", value);
         }
 
-        /*
+        
         [TestMethod]
         [ExpectedException(typeof(CircularException))]
         public void SmallestCycle()
         {
             AbstractSpreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", new Formula("A1"));
+            s.SetContentsOfCell("A1", "=A1");
         }
 
         [TestMethod]
@@ -189,14 +189,14 @@ namespace SpreadsheetTests
         public void LargeCycle()
         {
             AbstractSpreadsheet s = new Spreadsheet();
-            s.SetCellContents("A1", new Formula("B2 + 9"));
-            s.SetCellContents("B2", new Formula("C3 - 2"));
-            s.SetCellContents("C3", new Formula("E5/D4*17.5"));
-            s.SetCellContents("E5", new Formula("F7*(81/(3+F7))"));
-            s.SetCellContents("D4", 0.332);
-            s.SetCellContents("G8", new Formula("A1 - 90"));
-            s.SetCellContents("H9", "how is this a string?");
-            s.SetCellContents("F7", new Formula("G8 * (H9-1)/3"));
+            s.SetContentsOfCell("A1", "=B2 + 9");
+            s.SetContentsOfCell("B2", "=C3 - 2");
+            s.SetContentsOfCell("C3", "=E5/D4*17.5");
+            s.SetContentsOfCell("E5", "=F7*(81/(3+F7))");
+            s.SetContentsOfCell("D4", 0.332.ToString());
+            s.SetContentsOfCell("G8", "=A1 - 90");
+            s.SetContentsOfCell("H9", "how is this a string?");
+            s.SetContentsOfCell("F7", "=G8 * (H9-1)/3");
         }
 
         private AbstractSpreadsheet MakeSpreadsheet(Dictionary<string, object> cells)
@@ -206,11 +206,11 @@ namespace SpreadsheetTests
             foreach(KeyValuePair<string, object> pair in cells)
             {
                 if (pair.Value is double d)
-                    s.SetCellContents(pair.Key, d);
+                    s.SetContentsOfCell(pair.Key, d.ToString());
                 else if (pair.Value is string str)
-                    s.SetCellContents(pair.Key, str);
+                    s.SetContentsOfCell(pair.Key, str);
                 else if (pair.Value is Formula f)
-                    s.SetCellContents(pair.Key, f);
+                    s.SetContentsOfCell(pair.Key, "=" + f.ToString());
                 else
                     throw new ArgumentException("Did not recognize value " + pair.Value + " of type " + pair.Value.GetType() + " of cell " + pair.Key +".");
             }
@@ -291,46 +291,46 @@ namespace SpreadsheetTests
         public void CorrectCellsToRecalculate()
         {
             AbstractSpreadsheet s = new Spreadsheet();
-            IList<string> list =  s.SetCellContents("a1", 43);
+            IList<string> list =  s.SetContentsOfCell("a1", 43.ToString());
             CheckRecalculateList("a1", list);
 
-            list = s.SetCellContents("b2", new Formula("a1 + 3"));
+            list = s.SetContentsOfCell("b2", "=a1 + 3");
             CheckRecalculateList("b2", list);
 
-            list = s.SetCellContents("c3", new Formula("a1 - 2"));
+            list = s.SetContentsOfCell("c3", "=a1 - 2");
             CheckRecalculateList("c3", list);
 
-            list = s.SetCellContents("a1", 49);
+            list = s.SetContentsOfCell("a1", 49.ToString());
             Assert.AreEqual(3, list.Count);
             CheckRecalculateList(new HashSet<string>[] { new HashSet<string>() {"a1"}, new HashSet<string>() { "b2", "c3" } }, list);
 
-            list = s.SetCellContents("d4", new Formula("b2 - c3"));
+            list = s.SetContentsOfCell("d4", "=b2 - c3");
             CheckRecalculateList("d4", list);
 
             HashSet<string>[] nextDependents = new HashSet<string>[] { new HashSet<string>() {"a1"}, 
                 new HashSet<string>() { "b2","c3" },
                 new HashSet<string>() {"d4"}};
 
-            list = s.SetCellContents("a1", new Formula("c9 - goober"));
+            list = s.SetContentsOfCell("a1", "=c9 - goober");
             CheckRecalculateList(nextDependents, list);
 
             nextDependents = new HashSet<string>[] { new HashSet<string>() {"b2"},
                 new HashSet<string>() {"d4"}};
 
-            list = s.SetCellContents("b2", new Formula("a1 * c3"));
+            list = s.SetContentsOfCell("b2", "=a1 * c3");
             CheckRecalculateList(nextDependents, list);
 
             nextDependents = new HashSet<string>[] { new HashSet<string>() {"c3"},
                 new HashSet<string>() {"d4", "b2"}};
 
-            list = s.SetCellContents("c3", new Formula("goober - c9"));
+            list = s.SetContentsOfCell("c3", "=goober - c9");
             CheckRecalculateList(nextDependents, list);
 
             nextDependents = new HashSet<string>[] { new HashSet<string>() {"a1"},
                 new HashSet<string>() {"b2"},
                 new HashSet<string>() {"d4"}};
 
-            list = s.SetCellContents("a1", "this is the end of the test");
+            list = s.SetContentsOfCell("a1", "this is the end of the test");
             CheckRecalculateList(nextDependents, list);
         }
 
@@ -350,13 +350,13 @@ namespace SpreadsheetTests
 
             try
             {
-                s.SetCellContents("b1", new Formula("a1"));
+                s.SetContentsOfCell("b1", "=a1");
             }
             catch(CircularException c)
             {
                 noError = false;
-                CheckRecalculateList("a1", s.SetCellContents("a1", new Formula("a2 + a9")));
-                CheckRecalculateList(nextDependents, s.SetCellContents("b2", 3));
+                CheckRecalculateList("a1", s.SetContentsOfCell("a1", "=a2 + a9"));
+                CheckRecalculateList(nextDependents, s.SetContentsOfCell("b2", 3.ToString()));
 
                 Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("b1"));
             }
@@ -382,7 +382,7 @@ namespace SpreadsheetTests
                 new HashSet<string>() {"e5", "c3","a1", "b2"}
             };
 
-            CheckRecalculateList(nextDependents, s.SetCellContents("d4", 3));
+            CheckRecalculateList(nextDependents, s.SetContentsOfCell("d4", 3.ToString()));
 
             nextDependents = new HashSet<string>[]
             {
@@ -390,12 +390,11 @@ namespace SpreadsheetTests
                 new HashSet<string>() {"a1"}
             };
 
-            CheckRecalculateList(nextDependents, s.SetCellContents("b2", ""));
+            CheckRecalculateList(nextDependents, s.SetContentsOfCell("b2", ""));
             Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("b2"));
 
-            CheckRecalculateList("e5", s.SetCellContents("e5", ""));
+            CheckRecalculateList("e5", s.SetContentsOfCell("e5", ""));
             Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("e5"));
         }
-        */
     }
 }

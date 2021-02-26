@@ -261,13 +261,13 @@ namespace SS
 
         public override string GetSavedVersion(string filename)
         {
-            throw new NotImplementedException();
+            return manager.GetVersion(filename);
         }
 
         public override void Save(string filename)
         {
+            manager.Save(this, filename);
             Changed = false;
-            throw new NotImplementedException();
         }
 
         public override IList<string> SetContentsOfCell(string name, string content)
