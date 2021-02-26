@@ -70,7 +70,7 @@ namespace SS
         /// <returns>The contents of the cell.</returns>
         public override object GetCellContents(string name)
         {
-            CheckName(name);
+            name = CheckName(name);
 
             if (cells.TryGetValue(name, out Cell cell))
                 return cell.Contents;
@@ -142,7 +142,7 @@ namespace SS
         /// <returns>All the cells that need to be updated now that this cell has been added.</returns>
         private IList<string> AddCell(string name, object cont, IEnumerable<string> newDependees)
         {
-            CheckName(name);
+            name  = CheckName(name);
 
             /* Use changedCell to avoid putting the spreadsheet into an illegal state. 
              * (i.e. We only know whether adding this cell will result in a cycle once
@@ -190,23 +190,34 @@ namespace SS
         }
 
         /// <summary>
-        /// Checks if a cell name is valid.
+        /// Checks if a cell name is valid by the global definition that all names must follow.
+        /// (i.e. the name must consist a letter or underscore followed by letters, underscored,
+        /// and / or digits)
         /// </summary>
         /// <param name="name">The name of the cell to check.</param>
         /// <returns>Whether the name is valid.</returns>
-        private static bool IsValidName(string name)
+        private static bool IsGlobalValidName(string name)
         {
             return (!ReferenceEquals(name, null)) && Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z_\d]*$");
         }
 
         /// <summary>
-        /// Throws an InvalidNameException if the name of a cell is invalid.
+        /// Throws an InvalidNameException if the name of a cell is invalid
+        /// either by the global definition or the user-specified one.
         /// </summary>
         /// <param name="name">The name of the cell.</param>
-        private static void CheckName(string name)
+        /// <returns>The normalized name.</returns>
+        private string CheckName(string name)
         {
-            if (!IsValidName(name))
+            if (!IsGlobalValidName(name))
                 throw new InvalidNameException();
+
+            name = Normalize(name);
+
+            if (!IsValid(name))
+                throw new InvalidNameException();
+
+            return name;
         }
 
         public override string GetSavedVersion(string filename)
