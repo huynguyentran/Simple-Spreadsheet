@@ -682,5 +682,39 @@ namespace SpreadsheetTests
             Spreadsheet s = new Spreadsheet();
             s.GetSavedVersion(location);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void FileCircularDependency()
+        {
+            string location = "circular.xml";
+            using (XmlWriter writer = XmlWriter.Create(location))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "circularVersion");
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "a1");
+                writer.WriteElementString("contents", "= b2 + 3");
+                writer.WriteEndElement();
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "b2");
+                writer.WriteElementString("contents", "= c3/7");
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "c3");
+                writer.WriteElementString("contents", "= a1 *4");
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+
+            Spreadsheet s = new Spreadsheet(location, s => true, s => s, "circularVersion");
+        }
     }
 }
