@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using SpreadsheetUtilities;
+using System.IO;
 
 namespace SS
 {
@@ -12,11 +13,11 @@ namespace SS
 
         private const string spreadsheetKey = "spreadsheet";
 
-        private const string cellKey = "Cell";
+        private const string cellKey = "cell";
 
-        private const string nameKey = "Name";
+        private const string nameKey = "name";
 
-        private const string contentKey = "Content";
+        private const string contentKey = "contents";
 
         public string GetVersion(string filepath)
         {
@@ -26,7 +27,6 @@ namespace SS
                     if (reader.Name == spreadsheetKey)
                         return reader[versionKey];
             }
-
             throw new SpreadsheetReadWriteException("Was unable to find the spreadsheet's version (was not at the top of the file or file didn't exist).");
         }
 

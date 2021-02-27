@@ -4,6 +4,7 @@ using SpreadsheetUtilities;
 using System.Collections.Generic;
 using System;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace SpreadsheetTests
 {
@@ -395,6 +396,107 @@ namespace SpreadsheetTests
 
             CheckRecalculateList("e5", s.SetContentsOfCell("e5", ""));
             Assert.IsFalse(s.GetNamesOfAllNonemptyCells().Contains("e5"));
+        }
+
+        private void CheckSavedSpreadsheet(string location, string version, Dictionary<string, object> cells)
+        {
+            using (XmlReader reader = XmlReader.Create(location))
+            {
+                bool inSheet = false;
+                bool inCell = false;
+
+                string currentCellName = null;
+                string currentCellContents = null;
+
+                while (reader.Read())
+                {
+                    if (reader.IsStartElement())
+                    {
+                        switch (reader.Name)
+                        {
+                            case "spreadsheet":
+                                Assert.AreEqual(version, reader["version"]);
+                                if (!inSheet)
+                                    inSheet = true;
+                                else
+                                    Assert.Fail("Found spreadsheet inside of a spreadsheet which should not occur.");
+                                break;
+                            case "cell":
+                                if (!inSheet)
+                                    Assert.Fail("Cannot be in cell without being in spreadsheet.");
+                                if (!inCell)
+                                    inCell = true;
+                                else
+                                    Assert.Fail("Found cell inside of cell, which should not occur.");
+                                break;
+                            case "name":
+                                if (!inCell)
+                                    Assert.Fail("Name cannot exist outside of cell.");
+                                reader.Read();
+                                currentCellName = reader.Value;
+                                break;
+                            case "contents":
+                                if (!inCell)
+                                    Assert.Fail("Contents cannot exist outside of cell.");
+                                reader.Read();
+                                currentCellContents = reader.Value;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (reader.Name)
+                        {
+                            case "cell":
+                                if (ReferenceEquals(currentCellName, null))
+                                    Assert.Fail("Wasn't able to find a cell's name before the cell closed.");
+                                if (ReferenceEquals(currentCellContents, null))
+                                    Assert.Fail("Wasn't able to find a cell's contents before the cell closed.");
+
+                                Assert.AreEqual(currentCellContents, cells[currentCellName]);
+                                Assert.IsTrue(cells.Remove(currentCellName));
+
+                                inCell = false;
+                                currentCellName = null;
+                                currentCellContents = null;
+                                break;
+
+                            case "spreadsheet":
+                                inSheet = false;
+                                break;
+                        }
+                    }
+                }
+
+                Assert.IsFalse(inSheet);
+                Assert.IsFalse(inCell);
+            }
+
+            Assert.AreEqual(0, cells.Count);
+        }
+
+        private void CheckSavedSpreadsheet(string location, Dictionary<string, object> cells)
+        {
+            CheckSavedSpreadsheet(location, "default", cells);
+        }
+
+        [TestMethod]
+        public void SavingSimpleSpreadsheet()
+        {
+            Dictionary<string, object> cells = new Dictionary<string, object>();
+            cells.Add("a1", "31");
+            cells.Add("b1", "Torbjorn");
+            cells.Add("c1", "=a1*2");
+
+            AbstractSpreadsheet s = MakeSpreadsheet(cells);
+
+            string location = "simpleSpreadsheet.xml";
+
+            Assert.IsTrue(s.Changed);
+            s.Save(location);
+            Assert.IsFalse(s.Changed);
+
+            CheckSavedSpreadsheet(location, cells);
         }
     }
 }
