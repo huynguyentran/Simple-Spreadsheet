@@ -200,9 +200,9 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("F7", "=G8 * (H9-1)/3");
         }
 
-        private AbstractSpreadsheet MakeSpreadsheet(Dictionary<string, object> cells)
+        private AbstractSpreadsheet MakeSpreadsheet(Dictionary<string, object> cells, Func<string, bool> validator, Func<string, string> normalizer, string version)
         {
-            AbstractSpreadsheet s = new Spreadsheet();
+            AbstractSpreadsheet s = new Spreadsheet(validator, normalizer, version);
 
             foreach(KeyValuePair<string, object> pair in cells)
             {
@@ -219,12 +219,14 @@ namespace SpreadsheetTests
             return s;
         }
 
-        [TestMethod]
-        public AbstractSpreadsheet BasicContentsTest(Dictionary<string, object> d)
+        private AbstractSpreadsheet MakeSpreadsheet(Dictionary<string,object> cells)
+        {
+            return MakeSpreadsheet(cells, s => true, s => s, "default");
+        }
+
+        private AbstractSpreadsheet BasicContentsTest(Dictionary<string, object> d, AbstractSpreadsheet s)
         {
             d = new Dictionary<string, object>(d);
-
-            AbstractSpreadsheet s = MakeSpreadsheet(d);
 
             IEnumerable<string> cellNames = s.GetNamesOfAllNonemptyCells();
 
@@ -248,6 +250,11 @@ namespace SpreadsheetTests
                 Assert.Fail("A spreadsheet is missing " + d.Count + "cells.");
 
             return s;
+        }
+
+        private AbstractSpreadsheet BasicContentsTest(Dictionary<string, object> d)
+        {
+            return BasicContentsTest(d, MakeSpreadsheet(d));
         }
 
         [TestMethod]
@@ -490,13 +497,176 @@ namespace SpreadsheetTests
 
             AbstractSpreadsheet s = MakeSpreadsheet(cells);
 
-            string location = "simpleSpreadsheet.xml";
+            string location = "writeSimpleSpreadsheet.xml";
 
             Assert.IsTrue(s.Changed);
             s.Save(location);
             Assert.IsFalse(s.Changed);
 
             CheckSavedSpreadsheet(location, cells);
+        }
+
+        [TestMethod]
+        public void SavingSpreadsheetWithNormalizer()
+        {
+            Dictionary<string, object> cells = new Dictionary<string, object>();
+            cells.Add("robot", "chicken");
+            cells.Add("family", "guy");
+            cells.Add("spongebob", "squarepants");
+
+            AbstractSpreadsheet s = MakeSpreadsheet(cells, s=> true, upperCase, "default");
+
+            Dictionary<string, object> upperCaseCells = new Dictionary<string, object>();
+
+            foreach(KeyValuePair<string, object> pair in cells)
+            {
+                upperCaseCells.Add(upperCase(pair.Key), pair.Value);
+            }
+
+            string location = "writeNormalizerSpreadsheet.xml";
+
+            s.Save(location);
+
+            CheckSavedSpreadsheet(location, upperCaseCells);
+        }
+
+        private void WriteSpreadsheet(string location, string version, Dictionary<string, object> cells)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "\t";
+
+            using (XmlWriter writer = XmlWriter.Create(location))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", version);
+
+                foreach(KeyValuePair<string, object> pair in cells)
+                {
+                    writer.WriteStartElement("cell");
+                    writer.WriteElementString("name", pair.Key);
+                    if (pair.Value is string s)
+                        writer.WriteElementString("contents", s);
+                    else if (pair.Value is double d)
+                        writer.WriteElementString("contents", d.ToString());
+                    else if (pair.Value is Formula f)
+                        writer.WriteElementString("contents", "=" + f.ToString());
+
+                    writer.WriteEndElement();
+                }
+
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+        }
+
+        [TestMethod]
+        public void LoadSimpleSpreadsheet()
+        {
+            Dictionary<string, object> cells = new Dictionary<string, object>();
+            cells.Add("a1", 31d);
+            cells.Add("b1", "Torbjorn");
+            cells.Add("c1", new Formula("a1*2"));
+
+            string location = "readSimpleSpreadsheet.xml";
+
+            WriteSpreadsheet(location, "default", cells);
+
+            AbstractSpreadsheet s = BasicContentsTest(cells, new Spreadsheet(location, s => true, s => s, "good version"));
+
+            Assert.IsFalse(s.Changed);
+            Assert.AreEqual("good version", s.Version);
+        }
+
+        [TestMethod]
+        public void LoadEmptySpreadsheet()
+        {
+            Dictionary<string, object> cells = new Dictionary<string, object>();
+
+            string location = "readEmptySpreadsheet.xml";
+
+            WriteSpreadsheet(location, "default", cells);
+
+            AbstractSpreadsheet s = new Spreadsheet(location, s => true, s=> s, "default");
+
+            Assert.IsFalse(s.GetNamesOfAllNonemptyCells().GetEnumerator().MoveNext());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void LoadNonExistentDirectory()
+        {
+            new Spreadsheet("/this_location_probably_doesnt_exist_but_if_it_did_that_would_be_weird/teehsdaerps.xml",
+                s => true, s => s, "default");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void LoadNonExistentFile()
+        {
+            new Spreadsheet("shrodeingersSpreadsheetItExistsAndDoesntUntilObserved.xml",
+                s => true, s => s, "default");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void LoadEmptyFile()
+        {
+            string location = "empty.xml";
+            using(XmlWriter writer = XmlWriter.Create(location))
+            {
+                writer.WriteStartDocument();
+                writer.WriteEndDocument();
+            }
+
+            new Spreadsheet(location, s => true, s => s, "default");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void LoadBrokenSpreadsheetFile()
+        {
+            string location = "badSpreadsheet.xml";
+            using (XmlWriter writer = XmlWriter.Create(location))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "roger");
+                writer.WriteElementString("contents", "roger");
+                writer.WriteEndElement();
+                writer.WriteEndElement();
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "oops");
+                writer.WriteElementString("contents", "this is no good");
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+
+            new Spreadsheet(location, s => true, s => s, "default");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void LoadBrokenCellFile()
+        {
+            string location = "badCell.xml";
+            using (XmlWriter writer = XmlWriter.Create(location))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "roger");
+                writer.WriteEndElement();
+                writer.WriteElementString("contents", "oh this is bad");
+                writer.WriteEndElement();
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+
+            new Spreadsheet(location, s => true, s => s, "default");
         }
     }
 }

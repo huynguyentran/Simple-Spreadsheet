@@ -63,6 +63,8 @@ namespace SS
             cells = new Dictionary<string, Cell>();
 
             manager.Load(this, filepath);
+
+            Changed = false;
         }
 
         /// <summary>

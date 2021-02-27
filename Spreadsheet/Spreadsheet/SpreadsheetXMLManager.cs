@@ -80,7 +80,7 @@ namespace SS
         {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
-            settings.IndentChars = "    ";
+            settings.IndentChars = "\t";
 
             using (XmlWriter writer = XmlWriter.Create(filepath, settings))
             {
