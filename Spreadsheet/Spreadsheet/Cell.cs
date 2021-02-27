@@ -17,10 +17,20 @@ namespace SS
         /// </summary>
         private object _contents;
 
+        /// <summary>
+        /// The printed value of the cell.
+        /// </summary>
         private object _value;
 
+        /// <summary>
+        /// The method that gives the cell access to the double values in other cells.
+        /// This parameter may be null if this cell doesn't contain information that can be updated.
+        /// </summary>
         private Func<string, double> lookup;
 
+        /// <summary>
+        /// A wrapper property for the contents of the cell.
+        /// </summary>
         public object Contents
         {
             get { return _contents; }
@@ -28,6 +38,9 @@ namespace SS
             private set { _contents = value; }
         }
 
+        /// <summary>
+        /// A wrapper property for the value of the cell.
+        /// </summary>
         public object Value
         {
             get { return _value; }
@@ -35,9 +48,10 @@ namespace SS
         }
 
         /// <summary>
-        /// Creates a cell with non-null contents.
+        /// Creates a cell with non-null contents that can be updated with a lookup.
         /// </summary>
-        /// <param name="c">The contents of the cell.</param>
+        /// <param name="f">The updatable contents of the cell.</param>
+        /// <param name="l">The lookup method that finds the values of other cells.</param>
         public Cell(object f, Func<string, double> l)
         {
             if (ReferenceEquals(f, null))
