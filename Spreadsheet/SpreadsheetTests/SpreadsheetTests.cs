@@ -668,5 +668,13 @@ namespace SpreadsheetTests
 
             new Spreadsheet(location, s => true, s => s, "default");
         }
+
+        [TestMethod]
+        public void FindSpreadsheetVersion()
+        {
+            WriteSpreadsheet("coolSheet.xml", "cool", new Dictionary<string, object>());
+            Spreadsheet s = new Spreadsheet();
+            Assert.AreEqual("cool", s.GetSavedVersion("coolSheet.xml"));
+        }
     }
 }
