@@ -612,56 +612,45 @@ namespace SpreadsheetTests
 
         [TestMethod]
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
-        public void LoadEmptyFile()
-        {
-            string location = "empty.xml";
-            using(XmlWriter writer = XmlWriter.Create(location))
-            {
-                writer.WriteStartDocument();
-                writer.WriteEndDocument();
-            }
-
-            new Spreadsheet(location, s => true, s => s, "default");
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(SpreadsheetReadWriteException))]
-        public void LoadBrokenSpreadsheetFile()
-        {
-            string location = "badSpreadsheet.xml";
-            using (XmlWriter writer = XmlWriter.Create(location))
-            {
-                writer.WriteStartDocument();
-                writer.WriteStartElement("spreadsheet");
-                writer.WriteStartElement("cell");
-                writer.WriteElementString("name", "roger");
-                writer.WriteElementString("contents", "roger");
-                writer.WriteEndElement();
-                writer.WriteEndElement();
-                writer.WriteStartElement("cell");
-                writer.WriteElementString("name", "oops");
-                writer.WriteElementString("contents", "this is no good");
-                writer.WriteEndElement();
-                writer.WriteEndDocument();
-            }
-
-            new Spreadsheet(location, s => true, s => s, "default");
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(SpreadsheetReadWriteException))]
-        public void LoadBrokenCellFile()
+        public void LoadBrokenCellContentsFile()
         {
             string location = "badCell.xml";
             using (XmlWriter writer = XmlWriter.Create(location))
             {
                 writer.WriteStartDocument();
                 writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "default");
+
                 writer.WriteStartElement("cell");
                 writer.WriteElementString("name", "roger");
                 writer.WriteEndElement();
+
+                writer.WriteElementString("contents", "oh this is bad");
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+
+            new Spreadsheet(location, s => true, s => s, "default");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void LoadBrokenCellNameFile()
+        {
+            string location = "badCell.xml";
+            using (XmlWriter writer = XmlWriter.Create(location))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "default");
+
+                writer.WriteStartElement("cell");
                 writer.WriteElementString("contents", "oh this is bad");
                 writer.WriteEndElement();
+
+                writer.WriteElementString("name", "roger");
+
                 writer.WriteEndElement();
                 writer.WriteEndDocument();
             }
@@ -675,6 +664,23 @@ namespace SpreadsheetTests
             WriteSpreadsheet("coolSheet.xml", "cool", new Dictionary<string, object>());
             Spreadsheet s = new Spreadsheet();
             Assert.AreEqual("cool", s.GetSavedVersion("coolSheet.xml"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void FindNoSpreadsheetVersion()
+        {
+            string location = "noVersion.xml";
+            using (XmlWriter writer = XmlWriter.Create(location))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+
+            Spreadsheet s = new Spreadsheet();
+            s.GetSavedVersion(location);
         }
     }
 }
