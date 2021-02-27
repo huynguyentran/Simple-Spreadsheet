@@ -9,7 +9,7 @@ namespace SS
     /// A spreadsheet that keeps track of the contents and relations of cells.
     /// </summary>
     /// <author>Wiliam Erignac</author>
-    /// <version>2/24/2021</version>
+    /// <version>2/26/2021</version>
     public class Spreadsheet : AbstractSpreadsheet
     {
         /// <summary>
@@ -34,8 +34,14 @@ namespace SS
         /// </summary>
         private bool _changed = false;
 
+        /// <summary>
+        /// A wrapper property for the changed parameter.
+        /// </summary>
         public override bool Changed { get => _changed; protected set => _changed = value; }
 
+        /// <summary>
+        /// An object that saves the spreadsheet as a file.
+        /// </summary>
         private SpreadsheetFileManager manager = new SpreadsheetXMLManager();
 
         /// <summary>
@@ -56,6 +62,11 @@ namespace SS
             cells = new Dictionary<string, Cell>();
         }
 
+        /// <summary>
+        /// Creates a spreadsheet with the cells designated by a file (that also
+        /// takes a validator, normalizer, and version).
+        /// </summary>
+        /// <param name="filepath">The file to read.</param>
         public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version)
             : base(isValid, normalize, version)
         {
@@ -81,6 +92,12 @@ namespace SS
                 return "";
         }
 
+        /// <summary>
+        /// Gets the value of a cell using the cell's name.
+        /// By default, an empty string is returned as the contents of the cell.
+        /// </summary>
+        /// <param name="name">The name of the cell.</param>
+        /// <returns>The value of the cell.</returns>
         public override object GetCellValue(string name)
         {
             if (TryGetCell(name, out Cell cell))
@@ -89,6 +106,12 @@ namespace SS
                 return "";
         }
 
+        /// <summary>
+        /// Gets a cell in the spraedsheet.
+        /// </summary>
+        /// <param name="name">The name of the cell.</param>
+        /// <param name="cell">The cell.</param>
+        /// <returns>Whether that cell has contents.</returns>
         private bool TryGetCell(string name, out Cell cell)
         {
             cell = null;
@@ -157,6 +180,13 @@ namespace SS
             return AddCell(name, formula, formula.GetVariables(), LookupCellValue);
         }
 
+        /// <summary>
+        /// A method that serves as the lookup for formulas in cells.
+        /// It retrieves the double value of a cell, and throws an ArgumentException
+        /// if the value of the cell is not a double.
+        /// </summary>
+        /// <param name="name">The name of the cell to lookup.</param>
+        /// <returns>The double value of the cell.</returns>
         private double LookupCellValue(string name)
         {
             object value = GetCellValue(name);
@@ -261,26 +291,47 @@ namespace SS
             return name;
         }
 
+        /// <summary>
+        /// Gets the version of a saved spreadsheet.
+        /// </summary>
+        /// <param name="filename">The name of the file to read.</param>
+        /// <returns>The version of the spreadsheet.</returns>
         public override string GetSavedVersion(string filename)
         {
             return manager.GetVersion(filename);
         }
 
+        /// <summary>
+        /// Saves the spreadsheet as a file.
+        /// </summary>
+        /// <param name="filename">Where to save the spreadsheet.</param>
         public override void Save(string filename)
         {
             manager.Save(this, filename);
             Changed = false;
         }
 
+        /// <summary>
+        /// Sets the contents of a cell based on a string inputted by a user.
+        /// If the string is a double, the cell contains a double.
+        /// If the string starts with an =, the cell contains a formula.
+        /// Otherwise the cell contains the literal string.
+        /// </summary>
+        /// <param name="name">The name of the cell to set the contents of.</param>
+        /// <param name="content">The string representing the contents of the cell.</param>
+        /// <returns>A list of the cells that have new values from changing the specified cell.</returns>
         public override IList<string> SetContentsOfCell(string name, string content)
         {
+            //We can't have a cell with null contents!
             if (ReferenceEquals(content, null))
                 throw new ArgumentNullException("Content of a cell cannot be null");
 
+            //Making sure the name of the cell is valid.
             name = CheckName(name);
 
             IList<string> cellsToUpdate;
 
+            //Determining the contents type of the cell.
             if (Double.TryParse(content, out double d))
                 cellsToUpdate = SetCellContents(name, d);
             else if (content.Length > 0 && content[0].Equals('='))
@@ -288,6 +339,7 @@ namespace SS
             else
                 cellsToUpdate = SetCellContents(name, content);
 
+            //Updating the values of dependent cells.
             foreach(string relatedCellName in cellsToUpdate)
                 if (TryGetCell(relatedCellName, out Cell relatedCell))
                     relatedCell.UpdateValue();
