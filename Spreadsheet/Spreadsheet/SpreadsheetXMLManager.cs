@@ -92,7 +92,7 @@ namespace SS
                 string currentCellContents = null;
 
                 //Read the entire file...
-                while(reader.Read())
+                while(CanRead(reader))
                 {
                     if (reader.IsStartElement())
                     {
@@ -101,6 +101,8 @@ namespace SS
                             case spreadsheetKey:
                                 //We've entered a spreadsheet element.
                                 inSpreadsheet = true;
+                                if (reader[versionKey] != spreadsheet.Version)
+                                    throw new SpreadsheetReadWriteException("Incompatible versions " + reader[versionKey] + " (old) and " + spreadsheet.Version + " (new).");
                                 break;
                             case cellKey:
                                 //We've entered a cell element.
@@ -161,6 +163,18 @@ namespace SS
                         }
                     }
                 }
+            }
+        }
+
+        private bool CanRead(XmlReader reader)
+        {
+            try
+            {
+                return reader.Read();
+            }
+            catch(XmlException e)
+            {
+                throw new SpreadsheetReadWriteException(e.Message);
             }
         }
 

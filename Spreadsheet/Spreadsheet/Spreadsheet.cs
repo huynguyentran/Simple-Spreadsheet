@@ -284,10 +284,10 @@ namespace SS
                 throw new InvalidNameException();
 
             name = Normalize(name);
-
+            
             if (!IsValid(name))
                 throw new InvalidNameException();
-
+            
             return name;
         }
 
@@ -335,7 +335,7 @@ namespace SS
             if (Double.TryParse(content, out double d))
                 cellsToUpdate = SetCellContents(name, d);
             else if (content.Length > 0 && content[0].Equals('='))
-                cellsToUpdate = SetCellContents(name, new Formula(content.Substring(1)));
+                cellsToUpdate = SetCellContents(name, new Formula(content.Substring(1), Normalize, IsValid));
             else
                 cellsToUpdate = SetCellContents(name, content);
 
