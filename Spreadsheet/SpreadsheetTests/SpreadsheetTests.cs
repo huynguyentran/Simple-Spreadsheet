@@ -116,7 +116,7 @@ namespace SpreadsheetTests
             string formStr = "=a1*2";
 
             s.SetContentsOfCell("b2", formStr);
-            CheckCell(s, "B2", new Formula(formStr.Substring(1)), 6d);
+            CheckCell(s, "B2", new Formula(formStr.Substring(1), upperCase, rowColFormat), 6d);
         }
 
         [TestMethod]
@@ -572,7 +572,7 @@ namespace SpreadsheetTests
 
             string location = "readSimpleSpreadsheet.xml";
 
-            WriteSpreadsheet(location, "default", cells);
+            WriteSpreadsheet(location, "good version", cells);
 
             AbstractSpreadsheet s = BasicContentsTest(cells, new Spreadsheet(location, s => true, s => s, "good version"));
 
