@@ -43,8 +43,8 @@ namespace SpreadsheetGUI
             ss.SetValue(col, row, spreadsheet.GetCellValue(cellName).ToString());
         }
 
-        private string getNameOfCell(int col , int row)
-        {    
+        private string getNameOfCell(int col, int row)
+        {
             string cellName = ((char)(col + 65)).ToString() + (row + 1);
             return cellName;
         }
@@ -52,17 +52,18 @@ namespace SpreadsheetGUI
 
         private void cellContentBox_KeyPress(object sender, KeyPressEventArgs e)
         {
+         
             if (e.KeyChar == (char)Keys.Return)
             {
                 int row, col;
                 spreadSheetPanel.GetSelection(out col, out row);
-                spreadsheet.SetContentsOfCell(getNameOfCell(col, row), cellContentBox.Text);
-                string cellName = ((char)(col + 65)).ToString() + (row + 1);
+                string cellName = getNameOfCell(col, row);
+                spreadsheet.SetContentsOfCell(cellName, cellContentBox.Text);
                 cellValueBox.Text = spreadsheet.GetCellValue(cellName).ToString();
                 cellContentBox.Text = spreadsheet.GetCellContents(cellName).ToString();
                 spreadSheetPanel.SetValue(col, row, spreadsheet.GetCellValue(cellName).ToString());
             }
-           
+
         }
     }
 }
