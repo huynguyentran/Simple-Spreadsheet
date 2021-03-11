@@ -18,16 +18,21 @@ namespace SpreadsheetGUI
             InitializeComponent();
             spreadSheetPanel.SetSelection(0, 0);
             spreadSheetPanel.SelectionChanged += displaySelection;
+            displaySelection(spreadSheetPanel);
+
+      
         }
 
         private void displaySelection(SpreadsheetPanel ss)
         {
             int row, col;
             ss.GetSelection(out col, out row);
+
             row = row + 1;
-            col = col + 65;
-            char c = (char)col;
-            cellNameBox.Text = c.ToString() + row ;
+            string rowStr = "" + row;
+            char c = (char)(col+65);
+
+            cellNameBox.Text = c + rowStr ;
         }
 
     }
