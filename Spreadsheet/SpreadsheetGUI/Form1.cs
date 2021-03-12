@@ -85,8 +85,17 @@ namespace SpreadsheetGUI
 
         private void SaveContents(string cellName)
         {
-      
-            IList<string> dependencies = spreadsheet.SetContentsOfCell(cellName, cellContentBox.Text);
+            IList<string> dependencies;
+
+            try
+            {
+                dependencies = spreadsheet.SetContentsOfCell(cellName, cellContentBox.Text);
+            }
+            catch (CircularException c)
+            {
+                MessageBox.Show(c.Message);
+                return;
+            }
 
             UpdateTopCellVisual(cellName);
 
@@ -119,6 +128,11 @@ namespace SpreadsheetGUI
                 }
                  
             }
+        }
+
+        private void newSpreadsheetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpreadsheetApplicationContext.getAppContext().RunForm(new Form1());
         }
     }
 }
