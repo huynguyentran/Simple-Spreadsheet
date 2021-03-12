@@ -16,7 +16,7 @@ namespace SpreadsheetGUI
     public partial class Form1 : Form
     {
         private AbstractSpreadsheet spreadsheet;
-
+        private bool openExistingFile = false;
         public Form1()
         {
             InitializeComponent();
@@ -27,6 +27,25 @@ namespace SpreadsheetGUI
             displaySelection(spreadSheetPanel);
         }
 
+        public Form1(string filename)
+        {
+            openExistingFile = true;
+            InitializeComponent();
+            spreadSheetPanel.SetSelection(0, 0);
+
+            spreadsheet = new Spreadsheet(filename, IsCellName, s => s.ToUpper(), "ps6");
+          
+            cellNameBox.Text = "A1";
+            spreadSheetPanel.SelectionChanged += displaySelection;
+            displaySelection(spreadSheetPanel);
+            foreach (string cell in spreadsheet.GetNamesOfAllNonemptyCells())
+            {
+                (int, int) coordinates = GetCellRowAndCol(cell);
+                spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(cell).ToString());
+            }
+            openExistingFile = false;
+        }
+
         private bool IsCellName(string varName)
         {
             return Regex.IsMatch(varName, @"^[A-Z][1-9]{1,2}$");
@@ -34,7 +53,11 @@ namespace SpreadsheetGUI
 
         private void displaySelection(SpreadsheetPanel ss)
         {
-            SaveContents(cellNameBox.Text);
+            if (!openExistingFile)
+            {
+                SaveContents(cellNameBox.Text);
+            }
+            
             int row, col;
             ss.GetSelection(out col, out row);
             string cellName = GetNameOfCell(col, row);
@@ -133,6 +156,30 @@ namespace SpreadsheetGUI
         private void newSpreadsheetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SpreadsheetApplicationContext.getAppContext().RunForm(new Form1());
+        }
+
+        
+        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFile = new SaveFileDialog();
+            saveFile.Filter = "Spreadsheet|*.sprd|All File|*";
+            saveFile.Title = "Save your spreadsheet";
+            saveFile.ShowDialog();
+            spreadsheet.Save(saveFile.FileName);
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Filter = "Spreadsheet|*.sprd|All File|*";
+            openFile.Title = "Open your spreadsheet";
+            openFile.ShowDialog();
+            SpreadsheetApplicationContext.getAppContext().RunForm(new Form1(openFile.FileName));
         }
     }
 }
