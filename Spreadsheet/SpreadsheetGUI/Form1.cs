@@ -161,16 +161,45 @@ namespace SpreadsheetGUI
         
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            CloseDialog();
+        }
+
+        private void CloseDialog()
+        {
+            if (spreadsheet.Changed == true)
+            {
+                DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?", "Unsaved Changes", MessageBoxButtons.YesNoCancel);
+                switch (result)
+                {
+                    case DialogResult.Cancel:
+                        return;
+                    case DialogResult.Abort:
+                        return;
+                    case DialogResult.Yes:
+                        DialogResult saveResult = SaveDialogBox(out SaveFileDialog saveFile);
+                        if (saveResult == DialogResult.OK)
+                            spreadsheet.Save(saveFile.FileName);
+                        else
+                            return;
+                        break;
+                }
+            }
             Close();
+        }
+
+        private DialogResult SaveDialogBox(out SaveFileDialog saveFile)
+        {
+            saveFile = new SaveFileDialog();
+            saveFile.Filter = "Spreadsheet|*.sprd|All File|*";
+            saveFile.Title = "Save your spreadsheet";
+            return saveFile.ShowDialog();
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveFileDialog saveFile = new SaveFileDialog();
-            saveFile.Filter = "Spreadsheet|*.sprd|All File|*";
-            saveFile.Title = "Save your spreadsheet";
-            saveFile.ShowDialog();
-            spreadsheet.Save(saveFile.FileName);
+            DialogResult result = SaveDialogBox(out SaveFileDialog saveFile);
+            if (result == DialogResult.OK)
+                spreadsheet.Save(saveFile.FileName);
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -178,8 +207,9 @@ namespace SpreadsheetGUI
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Filter = "Spreadsheet|*.sprd|All File|*";
             openFile.Title = "Open your spreadsheet";
-            openFile.ShowDialog();
-            SpreadsheetApplicationContext.getAppContext().RunForm(new Form1(openFile.FileName));
+            DialogResult result = openFile.ShowDialog();
+            if (result == DialogResult.OK)
+                SpreadsheetApplicationContext.getAppContext().RunForm(new Form1(openFile.FileName));
         }
     }
 }
