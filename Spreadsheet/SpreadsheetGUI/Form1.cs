@@ -34,7 +34,7 @@ namespace SpreadsheetGUI
             spreadSheetPanel.SetSelection(0, 0);
 
             spreadsheet = new Spreadsheet(filename, IsCellName, s => s.ToUpper(), "ps6");
-          
+
             cellNameBox.Text = "A1";
             spreadSheetPanel.SelectionChanged += displaySelection;
             displaySelection(spreadSheetPanel);
@@ -57,7 +57,7 @@ namespace SpreadsheetGUI
             {
                 SaveContents(cellNameBox.Text);
             }
-            
+
             int row, col;
             ss.GetSelection(out col, out row);
             string cellName = GetNameOfCell(col, row);
@@ -103,7 +103,7 @@ namespace SpreadsheetGUI
                 string cellName = GetNameOfCell(col, row);
                 SaveContents(cellName);
             }
-         
+
         }
 
         private void SaveContents(string cellName)
@@ -114,9 +114,10 @@ namespace SpreadsheetGUI
             {
                 dependencies = spreadsheet.SetContentsOfCell(cellName, cellContentBox.Text);
             }
-            catch (CircularException c)
+            //Ask TA 
+            catch (Exception e)
             {
-                MessageBox.Show(c.Message);
+                MessageBox.Show(e.Message);
                 return;
             }
 
@@ -133,23 +134,27 @@ namespace SpreadsheetGUI
         {
             if (e.KeyChar == (char)Keys.Up || e.KeyChar == (char)Keys.Down || e.KeyChar == (char)Keys.Left || e.KeyChar == (char)Keys.Right)
             {
-              
+
                 int row, col;
                 spreadSheetPanel.GetSelection(out col, out row);
                 string cellName = GetNameOfCell(col, row);
                 SaveContents(cellName);
                 switch (e.KeyChar)
                 {
-                    case (char)Keys.Up: spreadSheetPanel.SetSelection(col,  row + 1);
+                    case (char)Keys.Up:
+                        spreadSheetPanel.SetSelection(col, row + 1);
                         break;
-                    case (char)Keys.Down: spreadSheetPanel.SetSelection(col, row - 1);
+                    case (char)Keys.Down:
+                        spreadSheetPanel.SetSelection(col, row - 1);
                         break;
-                    case (char)Keys.Left: spreadSheetPanel.SetSelection(col-1, row );
+                    case (char)Keys.Left:
+                        spreadSheetPanel.SetSelection(col - 1, row);
                         break;
-                    case (char)Keys.Right: spreadSheetPanel.SetSelection(col + 1, row );
+                    case (char)Keys.Right:
+                        spreadSheetPanel.SetSelection(col + 1, row);
                         break;
                 }
-                 
+
             }
         }
 
@@ -158,13 +163,13 @@ namespace SpreadsheetGUI
             SpreadsheetApplicationContext.getAppContext().RunForm(new Form1());
         }
 
-        
+
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CloseDialog();
+            Close();
         }
 
-        private void CloseDialog()
+        private bool CloseDialog()
         {
             if (spreadsheet.Changed == true)
             {
@@ -172,19 +177,19 @@ namespace SpreadsheetGUI
                 switch (result)
                 {
                     case DialogResult.Cancel:
-                        return;
+                        return false;
                     case DialogResult.Abort:
-                        return;
+                        return false;
                     case DialogResult.Yes:
                         DialogResult saveResult = SaveDialogBox(out SaveFileDialog saveFile);
                         if (saveResult == DialogResult.OK)
                             spreadsheet.Save(saveFile.FileName);
                         else
-                            return;
+                            return false;
                         break;
                 }
             }
-            Close();
+            return true;
         }
 
         private DialogResult SaveDialogBox(out SaveFileDialog saveFile)
@@ -210,6 +215,15 @@ namespace SpreadsheetGUI
             DialogResult result = openFile.ShowDialog();
             if (result == DialogResult.OK)
                 SpreadsheetApplicationContext.getAppContext().RunForm(new Form1(openFile.FileName));
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (CloseDialog() == false)
+            {
+                e.Cancel = true;
+            }
+            // Close();
         }
     }
 }

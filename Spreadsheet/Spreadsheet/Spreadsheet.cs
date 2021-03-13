@@ -162,6 +162,7 @@ namespace SS
              */
             if (text == "")
                 cells.Remove(name);
+         
 
             return toRecalculate;
         }
@@ -205,6 +206,7 @@ namespace SS
         /// <returns>All the cells that need to be updated now that this cell has been added.</returns>
         private IList<string> AddCell(string name, object cont, IEnumerable<string> newDependees, Func<string, double> lookup)
         {
+           
             /* Use changedCell to avoid putting the spreadsheet into an illegal state. 
              * (i.e. We only know whether adding this cell will result in a cycle once
              * we run GetCellsToRecalculate, which will stop this method).
@@ -215,6 +217,10 @@ namespace SS
 
             //Now that we know the cell is good to add, we add it to the Spreadsheet.
             dependencies.ReplaceDependees(name, changedCell.Value);
+            if (GetCellContents(name).Equals(cont))
+            {
+                return toRecalculate;
+            }
             cells.Remove(name);
             Cell newCell;
             if (!ReferenceEquals(lookup, null))
@@ -224,6 +230,7 @@ namespace SS
 
             cells[name] = newCell;
 
+        
             if (!Changed)
                 Changed = true;
 
