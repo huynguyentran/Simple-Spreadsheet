@@ -129,12 +129,12 @@ namespace SpreadsheetGUI
                 spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(dependency).ToString());
             }
         }
-
+  
         private void spreadSheetPanel_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Up || e.KeyChar == (char)Keys.Down || e.KeyChar == (char)Keys.Left || e.KeyChar == (char)Keys.Right)
             {
-
+               //Ask TA 
                 int row, col;
                 spreadSheetPanel.GetSelection(out col, out row);
                 string cellName = GetNameOfCell(col, row);
@@ -223,7 +223,21 @@ namespace SpreadsheetGUI
             {
                 e.Cancel = true;
             }
-            // Close();
         }
+        /* Ask TA about
+         * how to access the individual cells from spreadsheet panel.
+         * how to change our code to using threads and lock, and method invoker.
+         * what constitution at the features, can we use c# built in excel. 
+         * modification of earlier exercies. Add more to methods for features. 
+         * Independent closing
+         */
+
+        /* Ideas for additonal future
+         * Changing fonts
+         * Plot
+         * Showing, delete. dependencies
+         * 1
+         */
+
     }
 }
