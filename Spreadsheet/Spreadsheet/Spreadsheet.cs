@@ -217,10 +217,12 @@ namespace SS
 
             //Now that we know the cell is good to add, we add it to the Spreadsheet.
             dependencies.ReplaceDependees(name, changedCell.Value);
+
             if (GetCellContents(name).Equals(cont))
             {
                 return toRecalculate;
             }
+
             cells.Remove(name);
             Cell newCell;
             if (!ReferenceEquals(lookup, null))
