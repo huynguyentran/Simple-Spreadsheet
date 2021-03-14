@@ -1,7 +1,7 @@
 ﻿
 namespace SpreadsheetGUI
 {
-    partial class Form1
+    partial class SpreadsheetForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SpreadsheetForm));
             this.cellNameBox = new System.Windows.Forms.TextBox();
             this.cellValueBox = new System.Windows.Forms.TextBox();
             this.cellContentBox = new System.Windows.Forms.TextBox();
@@ -135,7 +135,7 @@ namespace SpreadsheetGUI
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
-            // Form1
+            // SpreadsheetForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -146,9 +146,9 @@ namespace SpreadsheetGUI
             this.Controls.Add(this.cellValueBox);
             this.Controls.Add(this.cellNameBox);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "Form1";
-            this.Text = "Form1";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.Name = "SpreadsheetForm";
+            this.Text = "SpreadsheetForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SpreadsheetForm_FormClosing);
             this.menu.ResumeLayout(false);
             this.menu.PerformLayout();
             this.ResumeLayout(false);
