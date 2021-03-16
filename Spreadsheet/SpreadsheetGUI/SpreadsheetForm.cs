@@ -198,7 +198,7 @@ namespace SpreadsheetGUI
             }
 
             UpdateTopCellVisual(cellName);
-            backgroundWorker1.RunWorkerAsync(dependencies);
+            dependenciesCalculator.RunWorkerAsync(dependencies);
             //Update the values of each cell that is dependent on the modified cell.
 
         }
