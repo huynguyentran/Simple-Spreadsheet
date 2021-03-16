@@ -26,12 +26,12 @@ namespace SpreadsheetGUI
         /// Spreadsheet that holds cell contents and values.
         /// </summary>
         private AbstractSpreadsheet spreadsheet;
-
+        
         /// <summary>
         /// Whether this spreadsheet was opened from a file.
         /// </summary>
-        // private bool openExistingFile = false;
-
+        private bool openExistingFile = false;
+        
         /// <summary>
         /// Creates a basic empty spreadsheet.
         /// </summary>
@@ -59,8 +59,8 @@ namespace SpreadsheetGUI
             InitializeComponent();
 
             //We're opening from an existing file.
-            // openExistingFile = true;
-
+            openExistingFile = true;
+            
             //Creating backing spreadsheet from file.
             spreadsheet = new Spreadsheet(filename, IsCellName, s => s.ToUpper(), "ps6");
 
@@ -79,7 +79,7 @@ namespace SpreadsheetGUI
                 spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(cell).ToString());
             }
 
-            //  openExistingFile = false;
+            openExistingFile = false;
         }
 
         /// <summary>
@@ -99,10 +99,10 @@ namespace SpreadsheetGUI
         private void displaySelection(SpreadsheetPanel ss)
         {
             //We don't want to override the contents of A1 when loading from a file.
-            //if (!openExistingFile)
-            //{
-            //    SaveContents(cellNameBox.Text);
-            //}
+            if (!openExistingFile)
+            {
+                SaveContents(cellNameBox.Text);
+            }
 
             spreadSheetPanel.Focus();
             //Get the name of the cell selected.
@@ -149,9 +149,9 @@ namespace SpreadsheetGUI
         /// <param name="cellName">The name of the cell to update the visuals.</param>
         private void UpdateTopCellVisual(string cellName)
         {
-
+           
             cellValueBox.Text = spreadsheet.GetCellValue(cellName).ToString();
-
+         
             object contents = spreadsheet.GetCellContents(cellName);
             //Check if the contents of the cell is a formula and display the formula correctly.
             if (contents is Formula f)
@@ -198,7 +198,12 @@ namespace SpreadsheetGUI
             }
 
             UpdateTopCellVisual(cellName);
-            dependenciesCalculator.RunWorkerAsync(dependencies);
+            //backgroundWorker1.RunWorkerAsync(dependencies);
+            foreach (string dependency in dependencies)
+            {
+                (int, int) coordinates = GetCellRowAndCol(dependency);
+                spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(dependency).ToString());
+            }
             //Update the values of each cell that is dependent on the modified cell.
 
         }
@@ -206,7 +211,7 @@ namespace SpreadsheetGUI
 
         protected override bool ProcessCmdKey(ref System.Windows.Forms.Message msg, System.Windows.Forms.Keys keyData)
         {
-
+        
             if (spreadSheetPanel.Focused == true)
             {
                 int row, col;
@@ -233,7 +238,7 @@ namespace SpreadsheetGUI
                         return true;
                 }
             }
-
+      
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
@@ -242,8 +247,8 @@ namespace SpreadsheetGUI
         /// </summary>
         private void newSpreadsheetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm());
-            // Thread thread = new Thread(Application.Run(new SpreadsheetForm()));
+              SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm());
+           // Thread thread = new Thread(Application.Run(new SpreadsheetForm()));
         }
 
         /// <summary>
@@ -264,7 +269,7 @@ namespace SpreadsheetGUI
             {
                 //Open the box if the spreadsheet was changed.
                 DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?", "Unsaved Changes", MessageBoxButtons.YesNoCancel);
-
+                
                 switch (result)
                 {
                     case DialogResult.Cancel:
@@ -317,7 +322,7 @@ namespace SpreadsheetGUI
             openFile.Title = "Open your spreadsheet";
             DialogResult result = openFile.ShowDialog();
             if (result == DialogResult.OK)
-                SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm(openFile.FileName));
+               SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm(openFile.FileName));
 
         }
 
@@ -331,11 +336,13 @@ namespace SpreadsheetGUI
             {
                 e.Cancel = true;
             }
+          //  if (Application.OpenForms.count)
+
         }
 
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult helpMenu = MessageBox.Show("To change the content of the cell, clicks on the panel and writes on the text box. To confirm your new change, either presses enter or click on another cell.", "Help menu.");
+            DialogResult helpMenu = MessageBox.Show("To change the content of the cell, clicks on the panel and writes on the text box. To confirm your new change, either presses enter or click on another cell.","Help menu.");
         }
 
         private void spreadSheetPanel_KeyPress(object sender, KeyPressEventArgs e)
@@ -348,12 +355,8 @@ namespace SpreadsheetGUI
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            IList<string> dependencies = (IList<string>)e.Argument;
-            foreach (string dependency in dependencies)
-            {
-                (int, int) coordinates = GetCellRowAndCol(dependency);
-                Invoke(new MethodInvoker(() => spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(dependency).ToString())));
-            }
+       
+        
         }
 
 
