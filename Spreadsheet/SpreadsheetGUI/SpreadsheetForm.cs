@@ -331,8 +331,6 @@ namespace SpreadsheetGUI
             {
                 e.Cancel = true;
             }
-            //  if (Application.OpenForms.count)
-
         }
 
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
