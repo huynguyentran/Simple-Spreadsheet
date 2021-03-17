@@ -42,34 +42,34 @@ namespace SpreadsheetGUI
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpMenu = new System.Windows.Forms.ToolStripDropDownButton();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.dependencyCalculator = new System.ComponentModel.BackgroundWorker();
             this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
             // cellNameBox
             // 
             this.cellNameBox.Enabled = false;
-            this.cellNameBox.Location = new System.Drawing.Point(13, 41);
+            this.cellNameBox.Location = new System.Drawing.Point(15, 51);
             this.cellNameBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cellNameBox.Name = "cellNameBox";
-            this.cellNameBox.Size = new System.Drawing.Size(100, 22);
+            this.cellNameBox.Size = new System.Drawing.Size(112, 26);
             this.cellNameBox.TabIndex = 1;
             // 
             // cellValueBox
             // 
             this.cellValueBox.Enabled = false;
-            this.cellValueBox.Location = new System.Drawing.Point(132, 41);
+            this.cellValueBox.Location = new System.Drawing.Point(148, 51);
             this.cellValueBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cellValueBox.Name = "cellValueBox";
-            this.cellValueBox.Size = new System.Drawing.Size(142, 22);
+            this.cellValueBox.Size = new System.Drawing.Size(159, 26);
             this.cellValueBox.TabIndex = 2;
             // 
             // cellContentBox
             // 
-            this.cellContentBox.Location = new System.Drawing.Point(295, 41);
+            this.cellContentBox.Location = new System.Drawing.Point(332, 51);
             this.cellContentBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cellContentBox.Name = "cellContentBox";
-            this.cellContentBox.Size = new System.Drawing.Size(918, 22);
+            this.cellContentBox.Size = new System.Drawing.Size(1032, 26);
             this.cellContentBox.TabIndex = 3;
             this.cellContentBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cellContentBox_KeyPress);
             // 
@@ -78,10 +78,10 @@ namespace SpreadsheetGUI
             this.spreadSheetPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.spreadSheetPanel.Location = new System.Drawing.Point(13, 78);
+            this.spreadSheetPanel.Location = new System.Drawing.Point(15, 98);
             this.spreadSheetPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.spreadSheetPanel.Name = "spreadSheetPanel";
-            this.spreadSheetPanel.Size = new System.Drawing.Size(1340, 560);
+            this.spreadSheetPanel.Size = new System.Drawing.Size(1508, 700);
             this.spreadSheetPanel.TabIndex = 4;
             this.spreadSheetPanel.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.spreadSheetPanel_KeyPress);
             // 
@@ -93,7 +93,7 @@ namespace SpreadsheetGUI
             this.helpMenu});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(1357, 27);
+            this.menu.Size = new System.Drawing.Size(1527, 34);
             this.menu.TabIndex = 5;
             this.menu.Text = "toolStrip1";
             // 
@@ -108,34 +108,34 @@ namespace SpreadsheetGUI
             this.fileMenuButton.Image = ((System.Drawing.Image)(resources.GetObject("fileMenuButton.Image")));
             this.fileMenuButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.fileMenuButton.Name = "fileMenuButton";
-            this.fileMenuButton.Size = new System.Drawing.Size(46, 24);
+            this.fileMenuButton.Size = new System.Drawing.Size(56, 29);
             this.fileMenuButton.Text = "File";
             // 
             // newSpreadsheetToolStripMenuItem
             // 
             this.newSpreadsheetToolStripMenuItem.Name = "newSpreadsheetToolStripMenuItem";
-            this.newSpreadsheetToolStripMenuItem.Size = new System.Drawing.Size(128, 26);
+            this.newSpreadsheetToolStripMenuItem.Size = new System.Drawing.Size(158, 34);
             this.newSpreadsheetToolStripMenuItem.Text = "New";
             this.newSpreadsheetToolStripMenuItem.Click += new System.EventHandler(this.newSpreadsheetToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(128, 26);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(158, 34);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(128, 26);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(158, 34);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(128, 26);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(158, 34);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
@@ -147,25 +147,26 @@ namespace SpreadsheetGUI
             this.helpMenu.Image = ((System.Drawing.Image)(resources.GetObject("helpMenu.Image")));
             this.helpMenu.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.helpMenu.Name = "helpMenu";
-            this.helpMenu.Size = new System.Drawing.Size(55, 24);
+            this.helpMenu.Size = new System.Drawing.Size(67, 29);
             this.helpMenu.Text = "Help";
             // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(185, 34);
             this.helpToolStripMenuItem.Text = "Selection";
             this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
             // 
-            // backgroundWorker1
+            // dependencyCalculator
             // 
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.dependencyCalculator.DoWork += new System.ComponentModel.DoWorkEventHandler(this.dependencyCalculator_DoWork);
+            this.dependencyCalculator.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.dependencyCalculator_RunWorkerCompleted);
             // 
             // SpreadsheetForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1357, 641);
+            this.ClientSize = new System.Drawing.Size(1527, 801);
             this.Controls.Add(this.menu);
             this.Controls.Add(this.spreadSheetPanel);
             this.Controls.Add(this.cellContentBox);
@@ -195,7 +196,7 @@ namespace SpreadsheetGUI
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.ToolStripDropDownButton helpMenu;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.ComponentModel.BackgroundWorker dependencyCalculator;
     }
 }
 

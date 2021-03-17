@@ -44,7 +44,7 @@ namespace SpreadsheetGUI
             //Setting the default selection to A1
             spreadSheetPanel.SetSelection(0, 0);
             cellNameBox.Text = "A1";
-            displaySelection(spreadSheetPanel);
+            displaySelection(spreadSheetPanel, false);
 
             //Every time the selection is changed, we update the visual representation.
             spreadSheetPanel.SelectionChanged += displaySelection;
@@ -67,7 +67,7 @@ namespace SpreadsheetGUI
             //Setting the default selection to A1
             spreadSheetPanel.SetSelection(0, 0);
             cellNameBox.Text = "A1";
-            displaySelection(spreadSheetPanel);
+            displaySelection(spreadSheetPanel, false);
 
             //Every time the selection is changed, we update the visual representation.
             spreadSheetPanel.SelectionChanged += displaySelection;
@@ -96,15 +96,15 @@ namespace SpreadsheetGUI
         /// Updates the SpreadsheetPanel to show the latest selection.
         /// </summary>
         /// <param name="ss">The SpreadsheetPanel to update.</param>
-        private void displaySelection(SpreadsheetPanel ss)
+        private void displaySelection(SpreadsheetPanel ss, bool savePreviousData)
         {
             //We don't want to override the contents of A1 when loading from a file.
-            if (!openExistingFile)
+            if (savePreviousData)
             {
-                SaveContents(cellNameBox.Text);
+                //Saves the contents of the previous cell before moving to the next.
+                SaveContents(cellNameBox.Text, cellContentBox.Text, true);
             }
 
-            spreadSheetPanel.Focus();
             //Get the name of the cell selected.
             ss.GetSelection(out int col, out int row);
             string cellName = GetNameOfCell(col, row);
@@ -116,6 +116,13 @@ namespace SpreadsheetGUI
 
             //Highlight the selected box.
             ss.SetValue(col, row, spreadsheet.GetCellValue(cellName).ToString());
+
+            spreadSheetPanel.Focus();
+        }
+
+        private void displaySelection(SpreadsheetPanel ss)
+        {
+            displaySelection(ss, true);
         }
 
         /// <summary>
@@ -172,7 +179,7 @@ namespace SpreadsheetGUI
                 int row, col;
                 spreadSheetPanel.GetSelection(out col, out row);
                 string cellName = GetNameOfCell(col, row);
-                SaveContents(cellName);
+                SaveContents(cellName, cellContentBox.Text, false);
                 spreadSheetPanel.Focus();
             }
         }
@@ -181,31 +188,12 @@ namespace SpreadsheetGUI
         /// Saves the contents of a cell to the backing spreadsheet.
         /// </summary>
         /// <param name="cellName">The name of the cell to save.</param>
-        private void SaveContents(string cellName)
+        private void SaveContents(string cellName, string content, bool movingToNewCell)
         {
-            //The other cells' values that need to be updated after changing this cell's contents.
-            IList<string> dependencies;
+            while (!cellContentBox.Enabled) { }
 
-            //Tries to update the cell contents.
-            try
-            {
-                dependencies = spreadsheet.SetContentsOfCell(cellName, cellContentBox.Text);
-            }
-            catch (Exception e)
-            { //If an exception is encountered, show the exception in a message box.
-                MessageBox.Show(e.Message);
-                return;
-            }
-
-            UpdateTopCellVisual(cellName);
-            //backgroundWorker1.RunWorkerAsync(dependencies);
-            foreach (string dependency in dependencies)
-            {
-                (int, int) coordinates = GetCellRowAndCol(dependency);
-                spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(dependency).ToString());
-            }
-            //Update the values of each cell that is dependent on the modified cell.
-
+            cellContentBox.Enabled = false;
+            dependencyCalculator.RunWorkerAsync(new Tuple<string, string, bool>(cellName, content, movingToNewCell));
         }
 
 
@@ -217,7 +205,7 @@ namespace SpreadsheetGUI
                 int row, col;
                 spreadSheetPanel.GetSelection(out col, out row);
                 string cellName = GetNameOfCell(col, row);
-                SaveContents(cellName);
+                //SaveContents(cellName, cellContentBox.Text);
                 switch (keyData)
                 {
                     case Keys.Up:
@@ -336,8 +324,6 @@ namespace SpreadsheetGUI
             {
                 e.Cancel = true;
             }
-          //  if (Application.OpenForms.count)
-
         }
 
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
@@ -353,10 +339,42 @@ namespace SpreadsheetGUI
             }
         }
 
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        private void dependencyCalculator_DoWork(object sender, DoWorkEventArgs e)
         {
-       
-        
+            Tuple<string, string, bool> arguments = (Tuple<string, string, bool>) e.Argument;
+
+            string cellName = arguments.Item1;
+            string contents = arguments.Item2;
+            bool movingToNewCell = arguments.Item3;
+
+            //The other cells' values that need to be updated after changing this cell's contents.
+            IList<string> dependencies;
+
+            //Tries to update the cell contents.
+            try
+            {
+                dependencies = spreadsheet.SetContentsOfCell(cellName, contents);
+            }
+            catch (Exception exception)
+            { //If an exception is encountered, show the exception in a message box.
+                Invoke(new MethodInvoker(() => MessageBox.Show(exception.Message)));
+                return;
+            }
+
+            if (!movingToNewCell)
+                Invoke(new MethodInvoker(() => UpdateTopCellVisual(cellName)));
+
+            //Update the values of each cell that is dependent on the modified cell.
+            foreach (string dependency in dependencies)
+            {
+                (int, int) coordinates = GetCellRowAndCol(dependency);
+                Invoke(new MethodInvoker(() => spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(dependency).ToString())));
+            }
+        }
+
+        private void dependencyCalculator_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            cellContentBox.Enabled = true;
         }
 
 
