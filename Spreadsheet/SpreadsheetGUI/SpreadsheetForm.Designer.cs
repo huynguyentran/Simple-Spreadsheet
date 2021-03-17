@@ -42,7 +42,14 @@ namespace SpreadsheetGUI
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpMenu = new System.Windows.Forms.ToolStripDropDownButton();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mathMenu = new System.Windows.Forms.ToolStripDropDownButton();
+            this.sumToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.averageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dependencyCalculator = new System.ComponentModel.BackgroundWorker();
+            this.subtractionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.multiplicationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.divisionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -66,10 +73,12 @@ namespace SpreadsheetGUI
             // 
             // cellContentBox
             // 
+            this.cellContentBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cellContentBox.Location = new System.Drawing.Point(332, 51);
             this.cellContentBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cellContentBox.Name = "cellContentBox";
-            this.cellContentBox.Size = new System.Drawing.Size(1032, 26);
+            this.cellContentBox.Size = new System.Drawing.Size(1153, 26);
             this.cellContentBox.TabIndex = 3;
             this.cellContentBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cellContentBox_KeyPress);
             // 
@@ -90,7 +99,8 @@ namespace SpreadsheetGUI
             this.menu.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileMenuButton,
-            this.helpMenu});
+            this.helpMenu,
+            this.mathMenu});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
             this.menu.Size = new System.Drawing.Size(1527, 34);
@@ -157,10 +167,63 @@ namespace SpreadsheetGUI
             this.helpToolStripMenuItem.Text = "Selection";
             this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
             // 
+            // mathMenu
+            // 
+            this.mathMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.mathMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.sumToolStripMenuItem,
+            this.averageToolStripMenuItem});
+            this.mathMenu.Image = ((System.Drawing.Image)(resources.GetObject("mathMenu.Image")));
+            this.mathMenu.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.mathMenu.Name = "mathMenu";
+            this.mathMenu.Size = new System.Drawing.Size(71, 29);
+            this.mathMenu.Text = "Math";
+            // 
+            // sumToolStripMenuItem
+            // 
+            this.sumToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem2,
+            this.subtractionToolStripMenuItem,
+            this.multiplicationToolStripMenuItem,
+            this.divisionToolStripMenuItem});
+            this.sumToolStripMenuItem.Name = "sumToolStripMenuItem";
+            this.sumToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.sumToolStripMenuItem.Text = "Sum";
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem2.Text = "Addition";
+            // 
+            // averageToolStripMenuItem
+            // 
+            this.averageToolStripMenuItem.Name = "averageToolStripMenuItem";
+            this.averageToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.averageToolStripMenuItem.Text = "Average";
+            // 
             // dependencyCalculator
             // 
             this.dependencyCalculator.DoWork += new System.ComponentModel.DoWorkEventHandler(this.dependencyCalculator_DoWork);
             this.dependencyCalculator.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.dependencyCalculator_RunWorkerCompleted);
+            // 
+            // subtractionToolStripMenuItem
+            // 
+            this.subtractionToolStripMenuItem.Name = "subtractionToolStripMenuItem";
+            this.subtractionToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.subtractionToolStripMenuItem.Text = "Subtraction";
+            // 
+            // multiplicationToolStripMenuItem
+            // 
+            this.multiplicationToolStripMenuItem.Name = "multiplicationToolStripMenuItem";
+            this.multiplicationToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.multiplicationToolStripMenuItem.Text = "Multiplication";
+            // 
+            // divisionToolStripMenuItem
+            // 
+            this.divisionToolStripMenuItem.Name = "divisionToolStripMenuItem";
+            this.divisionToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.divisionToolStripMenuItem.Text = "Division";
             // 
             // SpreadsheetForm
             // 
@@ -197,6 +260,13 @@ namespace SpreadsheetGUI
         private System.Windows.Forms.ToolStripDropDownButton helpMenu;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.ComponentModel.BackgroundWorker dependencyCalculator;
+        private System.Windows.Forms.ToolStripDropDownButton mathMenu;
+        private System.Windows.Forms.ToolStripMenuItem sumToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem averageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem subtractionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem multiplicationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem divisionToolStripMenuItem;
     }
 }
 
