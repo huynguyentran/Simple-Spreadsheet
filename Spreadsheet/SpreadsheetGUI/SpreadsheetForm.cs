@@ -38,6 +38,8 @@ namespace SpreadsheetGUI
         /// </summary>
         public SpreadsheetForm()
         {
+            //FeatureSelector.Show("Operation");
+
             InitializeComponent();
 
             saveContentQueue = new Queue<Tuple<string, string, bool>>();
@@ -79,8 +81,6 @@ namespace SpreadsheetGUI
                 (int, int) coordinates = GetCellRowAndCol(cell);
                 spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(cell).ToString());
             }
-
-
         }
 
         /// <summary>
@@ -424,5 +424,5 @@ namespace SpreadsheetGUI
          * 1
          */
 
-    }
+    }    
 }

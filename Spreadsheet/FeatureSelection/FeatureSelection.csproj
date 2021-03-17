@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{63A71D83-0CB9-4761-ADD6-83B2FE515D34}</ProjectGuid>
+    <ProjectGuid>{519616EE-5B5B-45D5-B09B-5831EAA30194}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>SpreadsheetGUI</RootNamespace>
-    <AssemblyName>SpreadsheetGUI</AssemblyName>
+    <RootNamespace>FeatureSelection</RootNamespace>
+    <AssemblyName>FeatureSelection</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -46,26 +46,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FeatureSelector.cs">
+    <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FeatureSelector.Designer.cs">
-      <DependentUpon>FeatureSelector.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SpreadsheetForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SpreadsheetForm.Designer.cs">
-      <DependentUpon>SpreadsheetForm.cs</DependentUpon>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FeatureSelector.resx">
-      <DependentUpon>FeatureSelector.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SpreadsheetForm.resx">
-      <DependentUpon>SpreadsheetForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -87,20 +75,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Formula\Formula.csproj">
-      <Project>{91a02e6f-04b0-4bbd-a62f-649d2cb31c8e}</Project>
-      <Name>Formula</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SpreadsheetPanel\SpreadsheetPanel.csproj">
-      <Project>{FDD1F575-3CFD-4F35-A1BD-76D9E7620745}</Project>
-      <Name>SpreadsheetPanel</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Spreadsheet\Spreadsheet.csproj">
-      <Project>{df89ad46-005a-4990-a27f-962c79ae72e7}</Project>
-      <Name>Spreadsheet</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
