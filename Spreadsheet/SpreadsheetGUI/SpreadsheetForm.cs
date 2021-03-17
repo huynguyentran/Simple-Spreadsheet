@@ -202,7 +202,7 @@ namespace SpreadsheetGUI
                     dependencyCalculator.RunWorkerAsync(saveContentQueue.Dequeue());
                 }
             }
-        
+
         }
 
         protected override bool ProcessCmdKey(ref System.Windows.Forms.Message msg, System.Windows.Forms.Keys keyData)
@@ -264,7 +264,7 @@ namespace SpreadsheetGUI
             if (spreadsheet.Changed == true)
             {
                 //Open the box if the spreadsheet was changed.
-                DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?", "Unsaved Changes", MessageBoxButtons.YesNoCancel);
+                DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?", "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation);
 
                 switch (result)
                 {
@@ -338,7 +338,7 @@ namespace SpreadsheetGUI
 
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult helpMenu = MessageBox.Show("To change the content of the cell, clicks on the panel and writes on the text box. To confirm your new change, either presses enter or click on another cell.", "Help menu.");
+            DialogResult helpMenu = MessageBox.Show("To change the content of the cell, clicks on the panel and writes on the text box. To confirm your new change, either presses enter or click on another cell.", "Help menu.", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void spreadSheetPanel_KeyPress(object sender, KeyPressEventArgs e)
@@ -368,7 +368,13 @@ namespace SpreadsheetGUI
             }
             catch (Exception exception)
             { //If an exception is encountered, show the exception in a message box.
-                Invoke(new MethodInvoker(() => MessageBox.Show(exception.Message)));
+                String message = exception.Message;
+                if (exception is SS.CircularException)
+                {
+                    message = "A circular logic has been detected.";
+                }
+
+                Invoke(new MethodInvoker(() => MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)));
                 return;
             }
 
