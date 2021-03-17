@@ -26,12 +26,13 @@ namespace SpreadsheetGUI
         /// Spreadsheet that holds cell contents and values.
         /// </summary>
         private AbstractSpreadsheet spreadsheet;
-        
+
         /// <summary>
         /// Whether this spreadsheet was opened from a file.
         /// </summary>
-        private bool openExistingFile = false;
-        
+
+        private Queue<Tuple<string, string, bool>> saveContentQueue;
+
         /// <summary>
         /// Creates a basic empty spreadsheet.
         /// </summary>
@@ -39,6 +40,7 @@ namespace SpreadsheetGUI
         {
             InitializeComponent();
 
+            saveContentQueue = new Queue<Tuple<string, string, bool>>();
             spreadsheet = new Spreadsheet(IsCellName, s => s.ToUpper(), "ps6");
 
             //Setting the default selection to A1
@@ -58,9 +60,8 @@ namespace SpreadsheetGUI
         {
             InitializeComponent();
 
-            //We're opening from an existing file.
-            openExistingFile = true;
-            
+            saveContentQueue = new Queue<Tuple<string, string, bool>>();
+
             //Creating backing spreadsheet from file.
             spreadsheet = new Spreadsheet(filename, IsCellName, s => s.ToUpper(), "ps6");
 
@@ -79,7 +80,7 @@ namespace SpreadsheetGUI
                 spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(cell).ToString());
             }
 
-            openExistingFile = false;
+
         }
 
         /// <summary>
@@ -156,9 +157,9 @@ namespace SpreadsheetGUI
         /// <param name="cellName">The name of the cell to update the visuals.</param>
         private void UpdateTopCellVisual(string cellName)
         {
-           
+
             cellValueBox.Text = spreadsheet.GetCellValue(cellName).ToString();
-         
+
             object contents = spreadsheet.GetCellContents(cellName);
             //Check if the contents of the cell is a formula and display the formula correctly.
             if (contents is Formula f)
@@ -190,16 +191,23 @@ namespace SpreadsheetGUI
         /// <param name="cellName">The name of the cell to save.</param>
         private void SaveContents(string cellName, string content, bool movingToNewCell)
         {
-            while (!cellContentBox.Enabled) { }
-
-            cellContentBox.Enabled = false;
-            dependencyCalculator.RunWorkerAsync(new Tuple<string, string, bool>(cellName, content, movingToNewCell));
+            //  while (!cellContentBox.Enabled) { }
+            //lock
+            lock (saveContentQueue)
+            {
+                saveContentQueue.Enqueue(new Tuple<string, string, bool>(cellName, content, movingToNewCell));
+                if (dependencyCalculator.IsBusy == false)
+                {
+                    cellContentBox.Enabled = false;
+                    dependencyCalculator.RunWorkerAsync(saveContentQueue.Dequeue());
+                }
+            }
+        
         }
-
 
         protected override bool ProcessCmdKey(ref System.Windows.Forms.Message msg, System.Windows.Forms.Keys keyData)
         {
-        
+
             if (spreadSheetPanel.Focused == true)
             {
                 int row, col;
@@ -226,7 +234,7 @@ namespace SpreadsheetGUI
                         return true;
                 }
             }
-      
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
@@ -235,8 +243,8 @@ namespace SpreadsheetGUI
         /// </summary>
         private void newSpreadsheetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-              SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm());
-           // Thread thread = new Thread(Application.Run(new SpreadsheetForm()));
+            SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm());
+            // Thread thread = new Thread(Application.Run(new SpreadsheetForm()));
         }
 
         /// <summary>
@@ -257,7 +265,7 @@ namespace SpreadsheetGUI
             {
                 //Open the box if the spreadsheet was changed.
                 DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?", "Unsaved Changes", MessageBoxButtons.YesNoCancel);
-                
+
                 switch (result)
                 {
                     case DialogResult.Cancel:
@@ -310,7 +318,7 @@ namespace SpreadsheetGUI
             openFile.Title = "Open your spreadsheet";
             DialogResult result = openFile.ShowDialog();
             if (result == DialogResult.OK)
-               SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm(openFile.FileName));
+                SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm(openFile.FileName));
 
         }
 
@@ -324,11 +332,13 @@ namespace SpreadsheetGUI
             {
                 e.Cancel = true;
             }
+            //  if (Application.OpenForms.count)
+
         }
 
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult helpMenu = MessageBox.Show("To change the content of the cell, clicks on the panel and writes on the text box. To confirm your new change, either presses enter or click on another cell.","Help menu.");
+            DialogResult helpMenu = MessageBox.Show("To change the content of the cell, clicks on the panel and writes on the text box. To confirm your new change, either presses enter or click on another cell.", "Help menu.");
         }
 
         private void spreadSheetPanel_KeyPress(object sender, KeyPressEventArgs e)
@@ -341,7 +351,8 @@ namespace SpreadsheetGUI
 
         private void dependencyCalculator_DoWork(object sender, DoWorkEventArgs e)
         {
-            Tuple<string, string, bool> arguments = (Tuple<string, string, bool>) e.Argument;
+
+            Tuple<string, string, bool> arguments = (Tuple<string, string, bool>)e.Argument;
 
             string cellName = arguments.Item1;
             string contents = arguments.Item2;
@@ -370,11 +381,24 @@ namespace SpreadsheetGUI
                 (int, int) coordinates = GetCellRowAndCol(dependency);
                 Invoke(new MethodInvoker(() => spreadSheetPanel.SetValue(coordinates.Item1, coordinates.Item2, spreadsheet.GetCellValue(dependency).ToString())));
             }
+
+
+
         }
 
         private void dependencyCalculator_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            cellContentBox.Enabled = true;
+            lock (saveContentQueue)
+            {
+                if (saveContentQueue.Count != 0)
+                {
+                    dependencyCalculator.RunWorkerAsync(saveContentQueue.Dequeue());
+                }
+                else
+                {
+                    cellContentBox.Enabled = true;
+                }
+            }
         }
 
 
