@@ -347,10 +347,6 @@ namespace SpreadsheetGUI
             string contents = arguments.Item2;
             bool movingToNewCell = arguments.Item3;
 
-            string message = "I'm saving: " + cellContentBox.Text + " at " + cellName;
-
-            Console.WriteLine(message);
-
             //The other cells' values that need to be updated after changing this cell's contents.
             IList<string> dependencies;
 
