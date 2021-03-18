@@ -154,7 +154,12 @@ namespace SS
 
         public void Highlight(int col, int row)
         {
-            drawingPanel.highlight(out col, out row);
+            drawingPanel.highlight(col, row);
+        }
+
+        public void ClearHighlights()
+        {
+            drawingPanel.ClearHighlights();
         }
 
         /// <summary>
@@ -249,7 +254,7 @@ namespace SS
             // The containing panel
             private SpreadsheetPanel _ssp;
 
-            private bool _highlight = false;
+            private HashSet<(int, int)> _highlights = new HashSet<(int, int)>();
 
 
             public DrawingPanel(SpreadsheetPanel ss)
@@ -328,11 +333,14 @@ namespace SS
                 row = _selectedRow;
             }
 
-            public void highlight(out int col, out int row)
+            public void highlight(int col, int row)
             {
-                _highlight = true;
-                col = _selectedCol;
-                row = _selectedRow;
+                _highlights.Add((col, row));
+            }
+
+            public void ClearHighlights()
+            {
+                _highlights.Clear();
             }
 
             public void HandleHScroll(Object sender, ScrollEventArgs args)
@@ -405,16 +413,18 @@ namespace SS
                     DrawRowLabel(e.Graphics, y, f);
                 }
 
-
-                if (((_selectedCol - _firstColumn >= 0) && (_selectedRow - _firstRow >= 0)) && _highlight == true)
+                //Add yellow highlight
+                foreach ((int, int) coordinate in _highlights)
                 {
-                    e.Graphics.FillRectangle(
-                         new SolidBrush(Color.Yellow),
-                        new Rectangle(LABEL_COL_WIDTH + (_selectedCol - _firstColumn) * DATA_COL_WIDTH + 1,
-                                      LABEL_ROW_HEIGHT + (_selectedRow - _firstRow) * DATA_ROW_HEIGHT + 1,
-                                      DATA_COL_WIDTH - 1,
-                                      DATA_ROW_HEIGHT - 1));
-                    _highlight = false;
+                    if ((coordinate.Item1 - _firstColumn >= 0) && (coordinate.Item2 - _firstRow >= 0))
+                    {
+                        e.Graphics.FillRectangle(
+                             new SolidBrush(Color.Yellow),
+                            new Rectangle(LABEL_COL_WIDTH + (coordinate.Item1 - _firstColumn) * DATA_COL_WIDTH + 1,
+                                          LABEL_ROW_HEIGHT + (coordinate.Item2 - _firstRow) * DATA_ROW_HEIGHT + 1,
+                                          DATA_COL_WIDTH - 1,
+                                          DATA_ROW_HEIGHT - 1));
+                    }
                 }
 
 

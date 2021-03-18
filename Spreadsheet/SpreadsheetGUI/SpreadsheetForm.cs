@@ -118,8 +118,6 @@ namespace SpreadsheetGUI
             //Highlight the selected box.
             ss.SetValue(col, row, spreadsheet.GetCellValue(cellName).ToString());
 
-            spreadSheetPanel.Highlight(col, row);
-
             spreadSheetPanel.Focus();
         }
 
@@ -164,10 +162,15 @@ namespace SpreadsheetGUI
 
             object contents = spreadsheet.GetCellContents(cellName);
             //Check if the contents of the cell is a formula and display the formula correctly.
+            cellContentBox.Text = ContentsToString(contents);
+        }
+
+        private string ContentsToString(object contents)
+        {
             if (contents is Formula f)
-                cellContentBox.Text = "=" + f.ToString();
+                return "=" + f.ToString();
             else
-                cellContentBox.Text = contents.ToString();
+                return contents.ToString();
         }
 
         /// <summary>
@@ -407,6 +410,31 @@ namespace SpreadsheetGUI
                     cellContentBox.Enabled = true;
                 }
             }
+        }
+
+        private void dependenciesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            spreadSheetPanel.GetSelection(out int col, out int row);
+            string cellName = GetNameOfCell(col, row);
+            object contents = spreadsheet.GetCellContents(cellName);
+            
+            IList<string> dependencies = spreadsheet.SetContentsOfCell(cellName, ContentsToString(contents));
+
+            spreadSheetPanel.ClearHighlights();
+
+            foreach(string cell in dependencies)
+            {
+                (int, int) coordinates = GetCellRowAndCol(cell);
+                spreadSheetPanel.Highlight(coordinates.Item1, coordinates.Item2);
+            }
+
+            displaySelection(spreadSheetPanel);
+        }
+
+        private void clearHighlightsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            spreadSheetPanel.ClearHighlights();
+            displaySelection(spreadSheetPanel);
         }
 
 

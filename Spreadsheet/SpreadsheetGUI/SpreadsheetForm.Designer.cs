@@ -33,7 +33,6 @@ namespace SpreadsheetGUI
             this.cellNameBox = new System.Windows.Forms.TextBox();
             this.cellValueBox = new System.Windows.Forms.TextBox();
             this.cellContentBox = new System.Windows.Forms.TextBox();
-            this.spreadSheetPanel = new SS.SpreadsheetPanel();
             this.menu = new System.Windows.Forms.ToolStrip();
             this.fileMenuButton = new System.Windows.Forms.ToolStripDropDownButton();
             this.newSpreadsheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,14 +41,11 @@ namespace SpreadsheetGUI
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpMenu = new System.Windows.Forms.ToolStripDropDownButton();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mathMenu = new System.Windows.Forms.ToolStripDropDownButton();
-            this.sumToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.averageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dependencyCalculator = new System.ComponentModel.BackgroundWorker();
-            this.subtractionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.multiplicationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.divisionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.featureMenu = new System.Windows.Forms.ToolStripDropDownButton();
+            this.dependenciesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.spreadSheetPanel = new SS.SpreadsheetPanel();
+            this.clearHighlightsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -82,28 +78,16 @@ namespace SpreadsheetGUI
             this.cellContentBox.TabIndex = 3;
             this.cellContentBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cellContentBox_KeyPress);
             // 
-            // spreadSheetPanel
-            // 
-            this.spreadSheetPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.spreadSheetPanel.Location = new System.Drawing.Point(15, 98);
-            this.spreadSheetPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.spreadSheetPanel.Name = "spreadSheetPanel";
-            this.spreadSheetPanel.Size = new System.Drawing.Size(1508, 700);
-            this.spreadSheetPanel.TabIndex = 4;
-            this.spreadSheetPanel.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.spreadSheetPanel_KeyPress);
-            // 
             // menu
             // 
             this.menu.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileMenuButton,
             this.helpMenu,
-            this.mathMenu});
+            this.featureMenu});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(1527, 34);
+            this.menu.Size = new System.Drawing.Size(1527, 38);
             this.menu.TabIndex = 5;
             this.menu.Text = "toolStrip1";
             // 
@@ -118,7 +102,7 @@ namespace SpreadsheetGUI
             this.fileMenuButton.Image = ((System.Drawing.Image)(resources.GetObject("fileMenuButton.Image")));
             this.fileMenuButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.fileMenuButton.Name = "fileMenuButton";
-            this.fileMenuButton.Size = new System.Drawing.Size(56, 29);
+            this.fileMenuButton.Size = new System.Drawing.Size(56, 33);
             this.fileMenuButton.Text = "File";
             // 
             // newSpreadsheetToolStripMenuItem
@@ -157,7 +141,7 @@ namespace SpreadsheetGUI
             this.helpMenu.Image = ((System.Drawing.Image)(resources.GetObject("helpMenu.Image")));
             this.helpMenu.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.helpMenu.Name = "helpMenu";
-            this.helpMenu.Size = new System.Drawing.Size(67, 29);
+            this.helpMenu.Size = new System.Drawing.Size(67, 33);
             this.helpMenu.Text = "Help";
             // 
             // helpToolStripMenuItem
@@ -167,63 +151,48 @@ namespace SpreadsheetGUI
             this.helpToolStripMenuItem.Text = "Selection";
             this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
             // 
-            // mathMenu
-            // 
-            this.mathMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.mathMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.sumToolStripMenuItem,
-            this.averageToolStripMenuItem});
-            this.mathMenu.Image = ((System.Drawing.Image)(resources.GetObject("mathMenu.Image")));
-            this.mathMenu.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.mathMenu.Name = "mathMenu";
-            this.mathMenu.Size = new System.Drawing.Size(71, 29);
-            this.mathMenu.Text = "Math";
-            // 
-            // sumToolStripMenuItem
-            // 
-            this.sumToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem2,
-            this.subtractionToolStripMenuItem,
-            this.multiplicationToolStripMenuItem,
-            this.divisionToolStripMenuItem});
-            this.sumToolStripMenuItem.Name = "sumToolStripMenuItem";
-            this.sumToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.sumToolStripMenuItem.Text = "Sum";
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(270, 34);
-            this.toolStripMenuItem2.Text = "Addition";
-            // 
-            // averageToolStripMenuItem
-            // 
-            this.averageToolStripMenuItem.Name = "averageToolStripMenuItem";
-            this.averageToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.averageToolStripMenuItem.Text = "Average";
-            // 
             // dependencyCalculator
             // 
             this.dependencyCalculator.DoWork += new System.ComponentModel.DoWorkEventHandler(this.dependencyCalculator_DoWork);
             this.dependencyCalculator.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.dependencyCalculator_RunWorkerCompleted);
             // 
-            // subtractionToolStripMenuItem
+            // featureMenu
             // 
-            this.subtractionToolStripMenuItem.Name = "subtractionToolStripMenuItem";
-            this.subtractionToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.subtractionToolStripMenuItem.Text = "Subtraction";
+            this.featureMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.featureMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dependenciesToolStripMenuItem,
+            this.clearHighlightsToolStripMenuItem});
+            this.featureMenu.Image = ((System.Drawing.Image)(resources.GetObject("featureMenu.Image")));
+            this.featureMenu.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.featureMenu.Name = "featureMenu";
+            this.featureMenu.Size = new System.Drawing.Size(96, 33);
+            this.featureMenu.Text = "Features";
             // 
-            // multiplicationToolStripMenuItem
+            // dependenciesToolStripMenuItem
             // 
-            this.multiplicationToolStripMenuItem.Name = "multiplicationToolStripMenuItem";
-            this.multiplicationToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.multiplicationToolStripMenuItem.Text = "Multiplication";
+            this.dependenciesToolStripMenuItem.Name = "dependenciesToolStripMenuItem";
+            this.dependenciesToolStripMenuItem.Size = new System.Drawing.Size(303, 34);
+            this.dependenciesToolStripMenuItem.Text = "Highlight Dependencies";
+            this.dependenciesToolStripMenuItem.Click += new System.EventHandler(this.dependenciesToolStripMenuItem_Click);
             // 
-            // divisionToolStripMenuItem
+            // spreadSheetPanel
             // 
-            this.divisionToolStripMenuItem.Name = "divisionToolStripMenuItem";
-            this.divisionToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.divisionToolStripMenuItem.Text = "Division";
+            this.spreadSheetPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.spreadSheetPanel.Location = new System.Drawing.Point(15, 98);
+            this.spreadSheetPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spreadSheetPanel.Name = "spreadSheetPanel";
+            this.spreadSheetPanel.Size = new System.Drawing.Size(1508, 700);
+            this.spreadSheetPanel.TabIndex = 4;
+            this.spreadSheetPanel.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.spreadSheetPanel_KeyPress);
+            // 
+            // clearHighlightsToolStripMenuItem
+            // 
+            this.clearHighlightsToolStripMenuItem.Name = "clearHighlightsToolStripMenuItem";
+            this.clearHighlightsToolStripMenuItem.Size = new System.Drawing.Size(303, 34);
+            this.clearHighlightsToolStripMenuItem.Text = "Clear Highlights";
+            this.clearHighlightsToolStripMenuItem.Click += new System.EventHandler(this.clearHighlightsToolStripMenuItem_Click);
             // 
             // SpreadsheetForm
             // 
@@ -260,13 +229,9 @@ namespace SpreadsheetGUI
         private System.Windows.Forms.ToolStripDropDownButton helpMenu;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.ComponentModel.BackgroundWorker dependencyCalculator;
-        private System.Windows.Forms.ToolStripDropDownButton mathMenu;
-        private System.Windows.Forms.ToolStripMenuItem sumToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem averageToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem subtractionToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem multiplicationToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem divisionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton featureMenu;
+        private System.Windows.Forms.ToolStripMenuItem dependenciesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearHighlightsToolStripMenuItem;
     }
 }
 
