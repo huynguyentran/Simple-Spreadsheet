@@ -185,7 +185,6 @@ namespace SpreadsheetGUI
                 int row, col;
                 spreadSheetPanel.GetSelection(out col, out row);
                 string cellName = GetNameOfCell(col, row);
-                string cellName = GetNameOfCell(col, row);
                 SaveContents(cellName, cellContentBox.Text, false);
                 spreadSheetPanel.Focus();
                 e.Handled = true;
