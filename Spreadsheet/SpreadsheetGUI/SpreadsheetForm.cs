@@ -385,6 +385,7 @@ namespace SpreadsheetGUI
                 }
 
                 Invoke(new MethodInvoker(() => MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)));
+                Invoke(new MethodInvoker(() => MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)));
                 return;
             }
 
@@ -477,6 +478,7 @@ namespace SpreadsheetGUI
             {
                 discoModeEnabled = false;
                 discoThread.Abort();
+                discoThread.Join();
                 Console.WriteLine("Disco effects removed");
             }
         }
@@ -484,7 +486,7 @@ namespace SpreadsheetGUI
 
         private Dictionary<(int,int),Color> colorChange(Random rnd)
         {
-            Color[] discoColors = new Color[] { Color.Red, Color.LightBlue, Color.LimeGreen, Color.Purple, Color.OrangeRed, Color.HotPink, Color.Gold };
+            Color[] discoColors = new Color[] { Color.Red, Color.Cyan, Color.Orange, Color.Lime, Color.Magenta};
 
             Dictionary<(int, int), Color> cellColors = new Dictionary<(int, int), Color>();
 
