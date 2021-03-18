@@ -334,6 +334,8 @@ namespace SpreadsheetGUI
         /// </summary>
         private void SpreadsheetForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+
+         
             if (CloseDialogBox() == false)
             {
                 e.Cancel = true;
@@ -454,48 +456,59 @@ namespace SpreadsheetGUI
                 discoModeEnabled = true;
                 //Set the inital Colors of cells.
                 Random rnd = new Random();
-
-                Color[] discoColors = new Color[] { Color.Red, Color.LightBlue, Color.Green, Color.Purple, Color.OrangeRed, Color.HotPink};
-
-                Dictionary<(int, int), Color> cellColors = new Dictionary<(int, int), Color>();
-
-                for (int col = 0; col < spreadSheetPanel.NumCols; col++)
-                {
-                    for (int row = 0; row < spreadSheetPanel.NumRows; row++)
-                    {
-                        cellColors.Add((col, row), discoColors[rnd.Next(discoColors.Length)]);
-                    }
-                }
-
+                Dictionary<(int, int), Color> cellColors = colorChange(rnd);
                 discoWorker.RunWorkerAsync(cellColors);
             }
             else
             {
-                discoModeEnabled = false;
+                discoWorker.CancelAsync();
+               // discoModeEnabled = false;
             }
+        }
+
+
+        private Dictionary<(int,int),Color> colorChange(Random rnd)
+        {
+            Color[] discoColors = new Color[] { Color.Red, Color.LightBlue, Color.LimeGreen, Color.Purple, Color.OrangeRed, Color.HotPink, Color.Gold };
+
+            Dictionary<(int, int), Color> cellColors = new Dictionary<(int, int), Color>();
+
+            for (int col = 0; col < spreadSheetPanel.NumCols; col++)
+            {
+                for (int row = 0; row < spreadSheetPanel.NumRows; row++)
+                {
+                    cellColors.Add((col, row), discoColors[rnd.Next(discoColors.Length)]);
+                }
+            }
+            return cellColors;
         }
 
         private void discoWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             float time = 0;
             float timeToAnimate = 0.5f;
-            int deltaTime = 50;
+            int deltaTime = 100;
 
             Dictionary<(int, int), Color> cellColors = (Dictionary<(int, int), Color>)e.Argument;
 
-            while(discoModeEnabled)
+            while(!discoWorker.CancellationPending)
             {
                 foreach(KeyValuePair<(int, int), Color> cellData in cellColors)
                 {
                     Color interpolation;
                     if (time < timeToAnimate)
+           
                          interpolation = SpreadsheetPanel.InterpolateColor(cellData.Value, Color.Black, time / timeToAnimate);
                     else
                         interpolation = SpreadsheetPanel.InterpolateColor(Color.Black, cellData.Value, (time - timeToAnimate)/ timeToAnimate);
 
                     Invoke(new MethodInvoker(() => spreadSheetPanel.Highlight(cellData.Key.Item1, cellData.Key.Item2, interpolation)));
                 }
+
                 Invoke(new MethodInvoker(() => displaySelection(spreadSheetPanel)));
+                Random rnd = new Random();
+
+                Invoke(new MethodInvoker(() => cellColors = colorChange(rnd)));
                 
                 Thread.Sleep(deltaTime);
                 time += ((float)deltaTime) / 1000;
@@ -504,12 +517,15 @@ namespace SpreadsheetGUI
                     time = time % timeToAnimate * 2;
                 }
             }
+
         }
 
         private void discoWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+          
             Invoke(new MethodInvoker(() => spreadSheetPanel.ClearHighlights()));
             Invoke(new MethodInvoker(() => displaySelection(spreadSheetPanel)));
+            discoModeEnabled = false;
         }
 
         /* Ask TA about
