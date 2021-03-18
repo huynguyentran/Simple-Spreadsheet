@@ -405,6 +405,19 @@ namespace SS
                     DrawRowLabel(e.Graphics, y, f);
                 }
 
+
+                if (((_selectedCol - _firstColumn >= 0) && (_selectedRow - _firstRow >= 0)) && _highlight == true)
+                {
+                    e.Graphics.FillRectangle(
+                         new SolidBrush(Color.Yellow),
+                        new Rectangle(LABEL_COL_WIDTH + (_selectedCol - _firstColumn) * DATA_COL_WIDTH + 1,
+                                      LABEL_ROW_HEIGHT + (_selectedRow - _firstRow) * DATA_ROW_HEIGHT + 1,
+                                      DATA_COL_WIDTH - 1,
+                                      DATA_ROW_HEIGHT - 1));
+                    _highlight = false;
+                }
+
+
                 // Highlight the selection, if it is visible
                 if ((_selectedCol - _firstColumn >= 0) && (_selectedRow - _firstRow >= 0))
                 {
@@ -418,17 +431,7 @@ namespace SS
                 }
 
 
-                if (((_selectedCol - _firstColumn >= 0) && (_selectedRow - _firstRow >= 0)) && _highlight == true)
-                {
-                    e.Graphics.FillRectangle(
-                         new SolidBrush(Color.Yellow),
-                        new Rectangle(LABEL_COL_WIDTH + (_selectedCol - _firstColumn) * DATA_COL_WIDTH + 1,
-                                      LABEL_ROW_HEIGHT + (_selectedRow - _firstRow) * DATA_ROW_HEIGHT + 1,
-                                      DATA_COL_WIDTH - 1,
-                                      DATA_ROW_HEIGHT - 1));
-                    _highlight = false;
-                }
-
+           
                 // Draw the text
                 foreach (KeyValuePair<Address, String> address in _values)
                 {
