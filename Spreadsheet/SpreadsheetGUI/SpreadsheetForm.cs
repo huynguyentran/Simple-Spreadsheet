@@ -118,6 +118,7 @@ namespace SpreadsheetGUI
             //Highlight the selected box.
             ss.SetValue(col, row, spreadsheet.GetCellValue(cellName).ToString());
 
+            spreadSheetPanel.Highlight(col, row);
             spreadSheetPanel.Focus();
         }
 
