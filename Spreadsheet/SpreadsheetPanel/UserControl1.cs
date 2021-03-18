@@ -423,12 +423,7 @@ namespace SS
                 {
                     if ((entry.Key.Item1 - _firstColumn >= 0) && (entry.Key.Item2 - _firstRow >= 0))
                     {
-                       // Color randomColor = Color.FromArgb(rnd.Next(1,255), rnd.Next(1, 255), rnd.Next(1, 255));
-
-                       //while(!_colors.Add(randomColor))
-                       // {
-                       //     randomColor = Color.FromArgb(rnd.Next(1, 255), rnd.Next(1, 255), rnd.Next(1, 255));
-                       // }
+                 
                         e.Graphics.FillRectangle(
                              new SolidBrush(entry.Value),
                             new Rectangle(LABEL_COL_WIDTH + (entry.Key.Item1 - _firstColumn) * DATA_COL_WIDTH + 1,
@@ -439,6 +434,20 @@ namespace SS
                    
                     }
                 }
+
+                //for (int i = 80; i < 26*80; i += 80)
+                //{
+                //    if ((entry.Key.Item1 - _firstColumn >= 0) && (entry.Key.Item2 - _firstRow >= 0))
+                //    {
+
+                //        e.Graphics.FillRectangle(
+                //             new SolidBrush(entry.Value),
+                //            new Rectangle(LABEL_COL_WIDTH + (entry.Key.Item1 - _firstColumn) * DATA_COL_WIDTH + 1,
+                //                          LABEL_ROW_HEIGHT + (entry.Key.Item2 - _firstRow) * DATA_ROW_HEIGHT + 1,
+                //                          DATA_COL_WIDTH - 1,
+                //                          DATA_ROW_HEIGHT - 1));
+                //    }
+                //}
 
 
                 // Highlight the selection, if it is visible
@@ -451,6 +460,7 @@ namespace SS
                                       DATA_COL_WIDTH - 2,
                                       DATA_ROW_HEIGHT - 2));
 
+                  
                 }
 
 

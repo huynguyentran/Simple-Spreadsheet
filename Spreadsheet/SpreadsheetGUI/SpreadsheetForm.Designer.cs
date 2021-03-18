@@ -187,7 +187,7 @@ namespace SpreadsheetGUI
             this.spreadSheetPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.spreadSheetPanel.Location = new System.Drawing.Point(13, 78);
+            this.spreadSheetPanel.Location = new System.Drawing.Point(17, 79);
             this.spreadSheetPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.spreadSheetPanel.Name = "spreadSheetPanel";
             this.spreadSheetPanel.Size = new System.Drawing.Size(1340, 560);
