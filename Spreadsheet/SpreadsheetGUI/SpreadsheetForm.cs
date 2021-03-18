@@ -185,7 +185,6 @@ namespace SpreadsheetGUI
                 int row, col;
                 spreadSheetPanel.GetSelection(out col, out row);
                 string cellName = GetNameOfCell(col, row);
-                string cellName = GetNameOfCell(col, row);
                 SaveContents(cellName, cellContentBox.Text, false);
                 spreadSheetPanel.Focus();
                 e.Handled = true;
@@ -419,15 +418,25 @@ namespace SpreadsheetGUI
             spreadSheetPanel.GetSelection(out int col, out int row);
             string cellName = GetNameOfCell(col, row);
             object contents = spreadsheet.GetCellContents(cellName);
-            
+
             IList<string> dependencies = spreadsheet.SetContentsOfCell(cellName, ContentsToString(contents));
+            Random rnd = new Random();
+           // spreadSheetPanel.ClearHighlights();
 
-            spreadSheetPanel.ClearHighlights();
+            HashSet<Color> colors = new HashSet<Color>();
 
-            foreach(string cell in dependencies)
+
+            Color randomColor;
+            do
+            {
+                randomColor = Color.FromArgb(rnd.Next(165, 255), rnd.Next(165, 255), rnd.Next(165, 255));
+            }
+            while (!colors.Add(randomColor));
+
+            foreach (string cell in dependencies)
             {
                 (int, int) coordinates = GetCellRowAndCol(cell);
-                spreadSheetPanel.Highlight(coordinates.Item1, coordinates.Item2);
+                spreadSheetPanel.Highlight(coordinates.Item1, coordinates.Item2, randomColor);
             }
 
             displaySelection(spreadSheetPanel);
@@ -456,5 +465,5 @@ namespace SpreadsheetGUI
          * 1
          */
 
-    }    
+    }
 }

@@ -55,8 +55,7 @@ namespace SS
         private const int COL_COUNT = 26;
         private const int ROW_COUNT = 99;
 
-        private bool highlight = false;
-
+      
 
         /// <summary>
         /// Creates an empty SpreadsheetPanel
@@ -152,9 +151,9 @@ namespace SS
             return drawingPanel.SetSelection(col, row);
         }
 
-        public void Highlight(int col, int row)
+        public void Highlight(int col, int row, Color color)
         {
-            drawingPanel.highlight(col, row);
+            drawingPanel.highlight(col, row, color);
         }
 
         public void ClearHighlights()
@@ -254,7 +253,9 @@ namespace SS
             // The containing panel
             private SpreadsheetPanel _ssp;
 
-            private HashSet<(int, int)> _highlights = new HashSet<(int, int)>();
+            private Dictionary<(int, int), Color> _highlights = new Dictionary<(int, int), Color>();
+            private Random rnd = new Random();
+
 
 
             public DrawingPanel(SpreadsheetPanel ss)
@@ -333,9 +334,13 @@ namespace SS
                 row = _selectedRow;
             }
 
-            public void highlight(int col, int row)
+            public void highlight(int col, int row, Color color)
             {
-                _highlights.Add((col, row));
+                if (_highlights.ContainsKey((col, row)))
+                {
+                    _highlights.Remove((col, row));
+                }
+                _highlights.Add((col, row),color);
             }
 
             public void ClearHighlights()
@@ -414,16 +419,24 @@ namespace SS
                 }
 
                 //Add yellow highlight
-                foreach ((int, int) coordinate in _highlights)
+                foreach (KeyValuePair<(int,int), Color> entry in _highlights)
                 {
-                    if ((coordinate.Item1 - _firstColumn >= 0) && (coordinate.Item2 - _firstRow >= 0))
+                    if ((entry.Key.Item1 - _firstColumn >= 0) && (entry.Key.Item2 - _firstRow >= 0))
                     {
+                       // Color randomColor = Color.FromArgb(rnd.Next(1,255), rnd.Next(1, 255), rnd.Next(1, 255));
+
+                       //while(!_colors.Add(randomColor))
+                       // {
+                       //     randomColor = Color.FromArgb(rnd.Next(1, 255), rnd.Next(1, 255), rnd.Next(1, 255));
+                       // }
                         e.Graphics.FillRectangle(
-                             new SolidBrush(Color.Yellow),
-                            new Rectangle(LABEL_COL_WIDTH + (coordinate.Item1 - _firstColumn) * DATA_COL_WIDTH + 1,
-                                          LABEL_ROW_HEIGHT + (coordinate.Item2 - _firstRow) * DATA_ROW_HEIGHT + 1,
+                             new SolidBrush(entry.Value),
+                            new Rectangle(LABEL_COL_WIDTH + (entry.Key.Item1 - _firstColumn) * DATA_COL_WIDTH + 1,
+                                          LABEL_ROW_HEIGHT + (entry.Key.Item2 - _firstRow) * DATA_ROW_HEIGHT + 1,
                                           DATA_COL_WIDTH - 1,
                                           DATA_ROW_HEIGHT - 1));
+
+                   
                     }
                 }
 
