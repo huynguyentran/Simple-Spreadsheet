@@ -27,20 +27,18 @@ namespace SpreadsheetGUI
         /// </summary>
         private AbstractSpreadsheet spreadsheet;
 
-        /// <summary>
-        /// Whether this spreadsheet was opened from a file.
-        /// </summary>
-
         private Queue<Tuple<string, string, bool>> saveContentQueue;
+
+        private bool discoModeEnabled;
 
         /// <summary>
         /// Creates a basic empty spreadsheet.
         /// </summary>
         public SpreadsheetForm()
         {
-            //FeatureSelector.Show("Operation");
-
             InitializeComponent();
+
+            discoModeEnabled = false;
 
             saveContentQueue = new Queue<Tuple<string, string, bool>>();
             spreadsheet = new Spreadsheet(IsCellName, s => s.ToUpper(), "ps6");
@@ -61,6 +59,8 @@ namespace SpreadsheetGUI
         public SpreadsheetForm(string filename)
         {
             InitializeComponent();
+
+            discoModeEnabled = false;
 
             saveContentQueue = new Queue<Tuple<string, string, bool>>();
 
@@ -421,7 +421,6 @@ namespace SpreadsheetGUI
 
             IList<string> dependencies = spreadsheet.SetContentsOfCell(cellName, ContentsToString(contents));
             Random rnd = new Random();
-           // spreadSheetPanel.ClearHighlights();
 
             HashSet<Color> colors = new HashSet<Color>();
 
@@ -448,6 +447,70 @@ namespace SpreadsheetGUI
             displaySelection(spreadSheetPanel);
         }
 
+        private void discoModeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!discoModeEnabled)
+            {
+                discoModeEnabled = true;
+                //Set the inital Colors of cells.
+                Random rnd = new Random();
+
+                Color[] discoColors = new Color[] { Color.Red, Color.LightBlue, Color.Green, Color.Purple, Color.OrangeRed, Color.HotPink};
+
+                Dictionary<(int, int), Color> cellColors = new Dictionary<(int, int), Color>();
+
+                for (int col = 0; col < spreadSheetPanel.NumCols; col++)
+                {
+                    for (int row = 0; row < spreadSheetPanel.NumRows; row++)
+                    {
+                        cellColors.Add((col, row), discoColors[rnd.Next(discoColors.Length)]);
+                    }
+                }
+
+                discoWorker.RunWorkerAsync(cellColors);
+            }
+            else
+            {
+                discoModeEnabled = false;
+            }
+        }
+
+        private void discoWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            float time = 0;
+            float timeToAnimate = 0.5f;
+            int deltaTime = 50;
+
+            Dictionary<(int, int), Color> cellColors = (Dictionary<(int, int), Color>)e.Argument;
+
+            while(discoModeEnabled)
+            {
+                foreach(KeyValuePair<(int, int), Color> cellData in cellColors)
+                {
+                    Color interpolation;
+                    if (time < timeToAnimate)
+                         interpolation = SpreadsheetPanel.InterpolateColor(cellData.Value, Color.Black, time / timeToAnimate);
+                    else
+                        interpolation = SpreadsheetPanel.InterpolateColor(Color.Black, cellData.Value, (time - timeToAnimate)/ timeToAnimate);
+
+                    Invoke(new MethodInvoker(() => spreadSheetPanel.Highlight(cellData.Key.Item1, cellData.Key.Item2, interpolation)));
+                }
+                Invoke(new MethodInvoker(() => displaySelection(spreadSheetPanel)));
+                
+                Thread.Sleep(deltaTime);
+                time += ((float)deltaTime) / 1000;
+                if (time >= timeToAnimate * 2)
+                {
+                    time = time % timeToAnimate * 2;
+                }
+            }
+        }
+
+        private void discoWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Invoke(new MethodInvoker(() => spreadSheetPanel.ClearHighlights()));
+            Invoke(new MethodInvoker(() => displaySelection(spreadSheetPanel)));
+        }
 
         /* Ask TA about
         * how to access the individual cells from spreadsheet panel.

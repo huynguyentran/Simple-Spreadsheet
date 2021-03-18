@@ -55,7 +55,17 @@ namespace SS
         private const int COL_COUNT = 26;
         private const int ROW_COUNT = 99;
 
-      
+        public int NumCols
+        {
+            get { return COL_COUNT; }
+        }
+
+        public int NumRows
+        {
+            get { return ROW_COUNT; }
+        }
+
+
 
         /// <summary>
         /// Creates an empty SpreadsheetPanel
@@ -232,6 +242,28 @@ namespace SS
 
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="start">Initial float.</param>
+        /// <param name="finish">Ending float.</param>
+        /// <param name="progress">Number between 0 and 1 to interpolate between the start and finish.</param>
+        /// <returns></returns>
+        public static int Interpolate(int start, int finish, float progress)
+        {
+            return start + (int)((finish - start) * progress);
+        }
+
+        public static Color InterpolateColor(Color start, Color finish, float progress)
+        {
+            Color intermediate = Color.FromArgb(
+                Interpolate(start.R, finish.R, progress),
+                Interpolate(start.B, finish.B, progress),
+                Interpolate(start.G, finish.G, progress));
+
+            return intermediate;
+        }
+
+        /// <summary>
         /// The panel where the spreadsheet grid is drawn.  It keeps track of the
         /// current selection as well as what is supposed to be drawn in each cell.
         /// </summary>
@@ -359,7 +391,6 @@ namespace SS
                 _firstRow = args.NewValue;
                 Invalidate();
             }
-
 
             protected override void OnPaint(PaintEventArgs e)
             {
