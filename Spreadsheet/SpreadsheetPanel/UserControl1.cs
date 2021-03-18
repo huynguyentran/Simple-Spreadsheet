@@ -55,6 +55,8 @@ namespace SS
         private const int COL_COUNT = 26;
         private const int ROW_COUNT = 99;
 
+        private bool highlight = false;
+
 
         /// <summary>
         /// Creates an empty SpreadsheetPanel
@@ -64,6 +66,8 @@ namespace SS
         {
 
             InitializeComponent();
+
+
 
             // The DrawingPanel is quite large, since it has 26 columns and 99 rows.  The
             // SpreadsheetPanel itself will usually be smaller, which is why scroll bars
@@ -148,6 +152,10 @@ namespace SS
             return drawingPanel.SetSelection(col, row);
         }
 
+        public void Highlight(int col, int row)
+        {
+            drawingPanel.highlight(out col, out row);
+        }
 
         /// <summary>
         /// Assigns the column and row of the current selection to the
@@ -241,6 +249,8 @@ namespace SS
             // The containing panel
             private SpreadsheetPanel _ssp;
 
+            private bool _highlight = false;
+
 
             public DrawingPanel(SpreadsheetPanel ss)
             {
@@ -318,6 +328,12 @@ namespace SS
                 row = _selectedRow;
             }
 
+            public void highlight(out int col, out int row)
+            {
+                _highlight = true;
+                col = _selectedCol;
+                row = _selectedRow;
+            }
 
             public void HandleHScroll(Object sender, ScrollEventArgs args)
             {
@@ -398,6 +414,19 @@ namespace SS
                                       LABEL_ROW_HEIGHT + (_selectedRow - _firstRow) * DATA_ROW_HEIGHT + 1,
                                       DATA_COL_WIDTH - 2,
                                       DATA_ROW_HEIGHT - 2));
+
+                }
+
+
+                if (((_selectedCol - _firstColumn >= 0) && (_selectedRow - _firstRow >= 0)) && _highlight == true)
+                {
+                    e.Graphics.FillRectangle(
+                         new SolidBrush(Color.Yellow),
+                        new Rectangle(LABEL_COL_WIDTH + (_selectedCol - _firstColumn) * DATA_COL_WIDTH + 1,
+                                      LABEL_ROW_HEIGHT + (_selectedRow - _firstRow) * DATA_ROW_HEIGHT + 1,
+                                      DATA_COL_WIDTH - 1,
+                                      DATA_ROW_HEIGHT - 1));
+                    _highlight = false;
                 }
 
                 // Draw the text
