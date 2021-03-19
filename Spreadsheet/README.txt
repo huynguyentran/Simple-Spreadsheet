@@ -42,8 +42,9 @@ Author: Willian Erignac & Huy Nguyen
 
 (03/17) When giving the errors to the user, the errors may be too cryptic for user to understand. 
 (03/18) If the user tries to exit the program while disco mode is enabled, it will through an error because the BackgroundWorker may not haven't finished running. (Fixed by replacing the backgroundworker with thread, Abort method is called when the user tries to exit the program.)
-(03/18) Some color may be retained in some cell if the user tries to highlight cells during disco mode (Heisen bug, maybe putting the thread to sleep for 100 second ?)
+(03/18) Some color may be retained in some cell if the user tries to highlight cells during disco mode (Fixed by not saving the content of selection while disco mode is on)
 (03/18) Disco mode may take focus of other panel. (Fixed by set a condition aroudn spreadSheetPanel.Focus() in display selection.)
-
+(03/18) Throw when clear highlight without actual highlight on the screen (Fixed by not saving content when clearing the highlight.)
+(03/18) Open file create a new form instead of replacing the current form (Fixed by changing the opening)
 <Not yet>
 maybe disable the spreadsheet panel entirely when disco mode is on 
