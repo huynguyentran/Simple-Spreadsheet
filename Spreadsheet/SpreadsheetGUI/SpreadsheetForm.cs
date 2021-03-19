@@ -133,7 +133,11 @@ namespace SpreadsheetGUI
             //Highlight the selected box.
             ss.SetValue(col, row, spreadsheet.GetCellValue(cellName).ToString());
 
-            spreadSheetPanel.Focus();
+            if (!discoModeEnabled)
+            {
+                spreadSheetPanel.Focus();
+            }
+
         }
 
         private void displaySelection(SpreadsheetPanel ss)
@@ -229,6 +233,12 @@ namespace SpreadsheetGUI
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="keyData"></param>
+        /// <returns></returns>
         protected override bool ProcessCmdKey(ref System.Windows.Forms.Message msg, System.Windows.Forms.Keys keyData)
         {
 
@@ -430,12 +440,15 @@ namespace SpreadsheetGUI
         /// </summary>
         private void dependencyCalculator_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            //Lock to make sure the content queue taking time.
             lock (saveContentQueue)
             {
+                //If there are other in the queue, finish the queue before unlock. 
                 if (saveContentQueue.Count != 0)
                 {
                     dependencyCalculator.RunWorkerAsync(saveContentQueue.Dequeue());
                 }
+                //Other than that, enabled the content box again for the user.
                 else
                 {
                     cellContentBox.Enabled = true;
@@ -498,9 +511,11 @@ namespace SpreadsheetGUI
                 //We enable the disco
                 cellContentBox.Enabled = false;
                 discoModeEnabled = true;
+
                 //Set the inital Colors of cells.
                 Random rnd = new Random();
                 Dictionary<(int, int), Color> cellColors = colorChange(rnd);
+
                 //Starts a disco thread.
                 discoThread = new Thread(discoWorker_DoWork);
                 discoThread.Start();
@@ -512,8 +527,7 @@ namespace SpreadsheetGUI
                 cellContentBox.Enabled = true;
                 TurnOffDisco();
 
-                //Commented out unncessary method 
-                //discoWorker_RunWorkerCompleted();
+
                 spreadSheetPanel.ClearHighlights();
                 displaySelection(spreadSheetPanel);
             }
@@ -573,6 +587,7 @@ namespace SpreadsheetGUI
             Dictionary<(int, int), Color> cellColors = colorChange(rnd);
             Dictionary<(int, int), Color> nextColors = colorChange(rnd);
 
+            //While we toggled the disco mode. 
             while (discoModeEnabled)
             {
                 foreach (KeyValuePair<(int, int), Color> cellData in cellColors)
@@ -601,12 +616,6 @@ namespace SpreadsheetGUI
                 }
             }
         }
-
-        //private void discoWorker_RunWorkerCompleted()
-        //{
-        //    spreadSheetPanel.ClearHighlights();
-        //    displaySelection(spreadSheetPanel);
-        //}
 
     }
 }
