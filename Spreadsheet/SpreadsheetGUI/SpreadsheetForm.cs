@@ -27,10 +27,19 @@ namespace SpreadsheetGUI
         /// </summary>
         private AbstractSpreadsheet spreadsheet;
 
+        /// <summary>
+        /// A Queue for saving content in the cell. 
+        /// </summary>
         private Queue<Tuple<string, string, bool>> saveContentQueue;
 
+        /// <summary>
+        /// A bool to indicate whether the disco mode is enabled or not. 
+        /// </summary>
         private bool discoModeEnabled;
 
+        /// <summary>
+        /// A thread to run the disco function. 
+        /// </summary>
         private Thread discoThread;
 
         /// <summary>
@@ -40,9 +49,12 @@ namespace SpreadsheetGUI
         {
             InitializeComponent();
 
+            //Making sure that everytime we open a new form, disco mode has been disabled. 
             discoModeEnabled = false;
 
+            //Creates a queue to save content. 
             saveContentQueue = new Queue<Tuple<string, string, bool>>();
+
             spreadsheet = new Spreadsheet(IsCellName, s => s.ToUpper(), "ps6");
 
             //Setting the default selection to A1
@@ -62,6 +74,7 @@ namespace SpreadsheetGUI
         {
             InitializeComponent();
 
+            //Making sure that everytime we open a new form, disco mode has been disabled. 
             discoModeEnabled = false;
 
             saveContentQueue = new Queue<Tuple<string, string, bool>>();
@@ -149,7 +162,6 @@ namespace SpreadsheetGUI
         {
             int col = name[0] - 65;
             int row = int.Parse(name.Substring(1)) - 1;
-
             return (col, row);
         }
 
@@ -167,6 +179,11 @@ namespace SpreadsheetGUI
             cellContentBox.Text = ContentsToString(contents);
         }
 
+        /// <summary>
+        ///  Turnings the cell content into string. 
+        /// </summary>
+        /// <param name="contents">The content of the cell</param>
+        /// <returns></returns>
         private string ContentsToString(object contents)
         {
             if (contents is Formula f)
@@ -199,8 +216,7 @@ namespace SpreadsheetGUI
         /// <param name="cellName">The name of the cell to save.</param>
         private void SaveContents(string cellName, string content, bool movingToNewCell)
         {
-            //  while (!cellContentBox.Enabled) { }
-            //lock
+            //When there are content needs to be save, the lock will prevent multiple workers calling on each other. 
             lock (saveContentQueue)
             {
                 saveContentQueue.Enqueue(new Tuple<string, string, bool>(cellName, content, movingToNewCell));
@@ -327,7 +343,6 @@ namespace SpreadsheetGUI
             DialogResult result = openFile.ShowDialog();
             if (result == DialogResult.OK)
                 SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm(openFile.FileName));
-
         }
 
         /// <summary>
@@ -336,21 +351,26 @@ namespace SpreadsheetGUI
         /// </summary>
         private void SpreadsheetForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            //Make sures that the disco function has been turn off before exit the application. 
             TurnOffDisco();
-         
+
             if (CloseDialogBox() == false)
             {
                 e.Cancel = true;
             }
-            //  if (Application.OpenForms.count)
-
         }
 
+        /// <summary>
+        /// Creates a help menu to give information to the user on how to use the spreadsheet.
+        /// </summary>
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DialogResult helpMenu = MessageBox.Show("To change the content of the cell, clicks on the panel and writes on the text box. To confirm your new change, either presses enter or click on another cell.", "Help menu.", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        /// <summary>
+        /// When pressing Enter while on the spreadsheet panel, the focus will move to the content box so user can input in.
+        /// </summary>
         private void spreadSheetPanel_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Enter)
@@ -359,6 +379,9 @@ namespace SpreadsheetGUI
             }
         }
 
+        /// <summary>
+        /// Calculated and updated the dependencies of the cell, using a background worker to not intrude users' experience. 
+        /// </summary>
         private void dependencyCalculator_DoWork(object sender, DoWorkEventArgs e)
         {
 
@@ -385,7 +408,6 @@ namespace SpreadsheetGUI
                 }
 
                 Invoke(new MethodInvoker(() => MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)));
-                Invoke(new MethodInvoker(() => MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)));
                 return;
             }
 
@@ -403,6 +425,9 @@ namespace SpreadsheetGUI
 
         }
 
+        /// <summary>
+        /// Enable the cellContentBox after the spreadsheet has finished updated the dependencies. 
+        /// </summary>
         private void dependencyCalculator_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             lock (saveContentQueue)
@@ -418,18 +443,24 @@ namespace SpreadsheetGUI
             }
         }
 
+
+        /// <summary>
+        /// A dependecies tool that highlight the cell depedents. 
+        /// </summary>
         private void dependenciesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             spreadSheetPanel.GetSelection(out int col, out int row);
             string cellName = GetNameOfCell(col, row);
             object contents = spreadsheet.GetCellContents(cellName);
 
+            //Gets the list of dependents. 
             IList<string> dependencies = spreadsheet.SetContentsOfCell(cellName, ContentsToString(contents));
-            Random rnd = new Random();
 
+            //Creates a random color everytime for the dependencies. 
+            Random rnd = new Random();
             HashSet<Color> colors = new HashSet<Color>();
 
-
+            //If we have highlighted other dependencies on the panel, it will choose another color. 
             Color randomColor;
             do
             {
@@ -437,6 +468,7 @@ namespace SpreadsheetGUI
             }
             while (!colors.Add(randomColor));
 
+            //Highlights all depdends. 
             foreach (string cell in dependencies)
             {
                 (int, int) coordinates = GetCellRowAndCol(cell);
@@ -446,29 +478,45 @@ namespace SpreadsheetGUI
             displaySelection(spreadSheetPanel);
         }
 
+        /// <summary>
+        /// Clear all the dependencies. 
+        /// </summary>
         private void clearHighlightsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             spreadSheetPanel.ClearHighlights();
             displaySelection(spreadSheetPanel);
         }
 
+        /// <summary>
+        /// Enables disco mode. 
+        /// </summary>
         private void discoModeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //If disco mode is not enabled. 
             if (!discoModeEnabled)
             {
+                //We enable the disco
                 cellContentBox.Enabled = false;
                 discoModeEnabled = true;
                 //Set the inital Colors of cells.
                 Random rnd = new Random();
                 Dictionary<(int, int), Color> cellColors = colorChange(rnd);
+                //Starts a disco thread.
                 discoThread = new Thread(discoWorker_DoWork);
                 discoThread.Start();
             }
+            //If disco mode is enabled.
             else
             {
+                //We shuts down the dance floor.
                 cellContentBox.Enabled = true;
-                TurnOffDisco();
-                discoWorker_RunWorkerCompleted();
+                //TurnOffDisco();
+
+
+                //Comment out unncessary method.
+                //discoWorker_RunWorkerCompleted();
+                spreadSheetPanel.ClearHighlights();
+                displaySelection(spreadSheetPanel);
             }
         }
 
@@ -483,13 +531,18 @@ namespace SpreadsheetGUI
             }
         }
 
-
-        private Dictionary<(int,int),Color> colorChange(Random rnd)
+        /// <summary>
+        /// A private method to get a random color for a cell. 
+        /// </summary>
+        /// <param name="rnd">A random element for the color</param>
+        /// <returns>A dictionary with cell as key and color as value</returns>
+        private Dictionary<(int, int), Color> colorChange(Random rnd)
         {
-            Color[] discoColors = new Color[] { Color.Red, Color.Cyan, Color.Orange, Color.Lime, Color.Magenta};
+            Color[] discoColors = new Color[] { Color.Red, Color.Cyan, Color.Orange, Color.Lime, Color.Magenta };
 
             Dictionary<(int, int), Color> cellColors = new Dictionary<(int, int), Color>();
 
+            //Loops through every visible cells. 
             for (int col = 0; col < spreadSheetPanel.NumCols; col++)
             {
                 for (int row = 0; row < spreadSheetPanel.NumRows; row++)
@@ -500,6 +553,9 @@ namespace SpreadsheetGUI
             return cellColors;
         }
 
+        /// <summary>
+        /// Changing the color of the cells constantly while disco mode is enabled. 
+        /// </summary>
         private void discoWorker_DoWork()
         {
             float time = 0;
@@ -510,7 +566,7 @@ namespace SpreadsheetGUI
             Dictionary<(int, int), Color> cellColors = colorChange(rnd);
             Dictionary<(int, int), Color> nextColors = colorChange(rnd);
 
-            while(discoModeEnabled)
+            while (discoModeEnabled)
             {
                 foreach (KeyValuePair<(int, int), Color> cellData in cellColors)
                 {
@@ -521,7 +577,7 @@ namespace SpreadsheetGUI
                     else
                         interpolation = SpreadsheetPanel.InterpolateColor(Color.Black, nextColors[cellData.Key], (time - timeToAnimate) / timeToAnimate);
 
-                    
+
                     Invoke(new MethodInvoker(() => spreadSheetPanel.Highlight(cellData.Key.Item1, cellData.Key.Item2, interpolation)));
 
                 }
@@ -539,27 +595,12 @@ namespace SpreadsheetGUI
             }
         }
 
-        private void discoWorker_RunWorkerCompleted()
-        {
-            spreadSheetPanel.ClearHighlights();
-            displaySelection(spreadSheetPanel);
-        }
-
-        /* Ask TA about
-        * how to access the individual cells from spreadsheet panel.
-        * how to change our code to using threads and lock, and method invoker.
-        * what constitution at the features, can we use c# built in excel. 
-        * modification of earlier exercies. Add more to methods for features. 
-        * Independent closing
-        *    the sound when pressing enter
-        */
-
-        /* Ideas for additonal future
-         * Changing fonts
-         * Plot
-         * Showing, delete. dependencies
-         * 1
-         */
+        //
+        //private void discoWorker_RunWorkerCompleted()
+        //{
+        //    spreadSheetPanel.ClearHighlights();
+        //    displaySelection(spreadSheetPanel);
+        //}
 
     }
 }
