@@ -355,7 +355,7 @@ namespace SpreadsheetGUI
         private DialogResult SaveDialogBox(out SaveFileDialog saveFile)
         {
             saveFile = new SaveFileDialog();
-            saveFile.Filter = "Spreadsheet|*.sprd|All File|*";
+            saveFile.Filter = "Spreadsheet .sprd|*.sprd|All File|*";
             saveFile.Title = "Save your spreadsheet";
             return saveFile.ShowDialog();
         }
