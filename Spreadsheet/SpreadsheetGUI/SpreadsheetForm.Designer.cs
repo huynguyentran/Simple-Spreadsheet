@@ -47,6 +47,9 @@ namespace SpreadsheetGUI
             this.discoModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dependencyCalculator = new System.ComponentModel.BackgroundWorker();
             this.spreadSheetPanel = new SS.SpreadsheetPanel();
+            this.featuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.highlightsDependentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.discoModeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -138,7 +141,8 @@ namespace SpreadsheetGUI
             // 
             this.helpMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.helpMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.helpToolStripMenuItem});
+            this.helpToolStripMenuItem,
+            this.featuresToolStripMenuItem});
             this.helpMenu.Image = ((System.Drawing.Image)(resources.GetObject("helpMenu.Image")));
             this.helpMenu.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.helpMenu.Name = "helpMenu";
@@ -148,7 +152,7 @@ namespace SpreadsheetGUI
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(153, 26);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.helpToolStripMenuItem.Text = "Selection";
             this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
             // 
@@ -203,6 +207,29 @@ namespace SpreadsheetGUI
             this.spreadSheetPanel.TabIndex = 4;
             this.spreadSheetPanel.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.spreadSheetPanel_KeyPress);
             // 
+            // featuresToolStripMenuItem
+            // 
+            this.featuresToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.highlightsDependentsToolStripMenuItem,
+            this.discoModeToolStripMenuItem1});
+            this.featuresToolStripMenuItem.Name = "featuresToolStripMenuItem";
+            this.featuresToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.featuresToolStripMenuItem.Text = "Features ";
+            // 
+            // highlightsDependentsToolStripMenuItem
+            // 
+            this.highlightsDependentsToolStripMenuItem.Name = "highlightsDependentsToolStripMenuItem";
+            this.highlightsDependentsToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
+            this.highlightsDependentsToolStripMenuItem.Text = "Highlight Dependents";
+            this.highlightsDependentsToolStripMenuItem.Click += new System.EventHandler(this.highlightsDependentsToolStripMenuItem_Click);
+            // 
+            // discoModeToolStripMenuItem1
+            // 
+            this.discoModeToolStripMenuItem1.Name = "discoModeToolStripMenuItem1";
+            this.discoModeToolStripMenuItem1.Size = new System.Drawing.Size(238, 26);
+            this.discoModeToolStripMenuItem1.Text = "Disco Mode";
+            this.discoModeToolStripMenuItem1.Click += new System.EventHandler(this.discoModeToolStripMenuItem1_Click);
+            // 
             // SpreadsheetForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -242,6 +269,9 @@ namespace SpreadsheetGUI
         private System.Windows.Forms.ToolStripMenuItem dependenciesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearHighlightsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem discoModeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem featuresToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem highlightsDependentsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem discoModeToolStripMenuItem1;
     }
 }
 

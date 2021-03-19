@@ -375,7 +375,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult helpMenu = MessageBox.Show("To change the content of the cell, clicks on the panel and writes on the text box. To confirm your new change, either presses enter or click on another cell.", "Help menu.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            DialogResult helpMenu = MessageBox.Show("To change the content of the cell, clicks on the panel and writes on the text box. \nTo confirm your new change, either presses enter or click on another cell. \nYou can also move to adjacent cells using the arrow key when a cell is selected", "Help menu.", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>
@@ -617,5 +617,14 @@ namespace SpreadsheetGUI
             }
         }
 
+        private void highlightsDependentsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult helpMenu = MessageBox.Show("To show the depedents of a cell, select a cell then go to Features -> Highlight Dependents. This will color the cell and its dependents. \nTo clear all highlights, go to Features -> Clear All Highlights  \n \nNote: If the cell does not have any dependents, the feature will highlight that cell only.", "Highlighting depdendents.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void discoModeToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            DialogResult helpMenu = MessageBox.Show("To enable the dance floor, go to Features -> Toggle Disco Mode. \nTo shut down the party, press Toggle Disco Mode again.", "Disco Mode", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
     }
 }
