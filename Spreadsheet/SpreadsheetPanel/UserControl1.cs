@@ -301,10 +301,8 @@ namespace SS
             // The containing panel
             private SpreadsheetPanel _ssp;
 
+            // A dictionary that saves the cell and its color. 
             private Dictionary<(int, int), Color> _highlights = new Dictionary<(int, int), Color>();
-            private Random rnd = new Random();
-
-
 
             public DrawingPanel(SpreadsheetPanel ss)
             {
@@ -465,7 +463,7 @@ namespace SS
                     DrawRowLabel(e.Graphics, y, f);
                 }
 
-                //Add yellow highlight
+                //Add highlights
                 foreach (KeyValuePair<(int,int), Color> entry in _highlights)
                 {
                     if ((entry.Key.Item1 - _firstColumn >= 0) && (entry.Key.Item2 - _firstRow >= 0))
@@ -477,25 +475,8 @@ namespace SS
                                           LABEL_ROW_HEIGHT + (entry.Key.Item2 - _firstRow) * DATA_ROW_HEIGHT + 1,
                                           DATA_COL_WIDTH - 1,
                                           DATA_ROW_HEIGHT - 1));
-
-                   
                     }
                 }
-
-                //for (int i = 80; i < 26*80; i += 80)
-                //{
-                //    if ((entry.Key.Item1 - _firstColumn >= 0) && (entry.Key.Item2 - _firstRow >= 0))
-                //    {
-
-                //        e.Graphics.FillRectangle(
-                //             new SolidBrush(entry.Value),
-                //            new Rectangle(LABEL_COL_WIDTH + (entry.Key.Item1 - _firstColumn) * DATA_COL_WIDTH + 1,
-                //                          LABEL_ROW_HEIGHT + (entry.Key.Item2 - _firstRow) * DATA_ROW_HEIGHT + 1,
-                //                          DATA_COL_WIDTH - 1,
-                //                          DATA_ROW_HEIGHT - 1));
-                //    }
-                //}
-
 
                 // Highlight the selection, if it is visible
                 if ((_selectedCol - _firstColumn >= 0) && (_selectedRow - _firstRow >= 0))
@@ -506,11 +487,7 @@ namespace SS
                                       LABEL_ROW_HEIGHT + (_selectedRow - _firstRow) * DATA_ROW_HEIGHT + 1,
                                       DATA_COL_WIDTH - 2,
                                       DATA_ROW_HEIGHT - 2));
-
-                  
                 }
-
-
            
                 // Draw the text
                 foreach (KeyValuePair<Address, String> address in _values)
@@ -536,8 +513,6 @@ namespace SS
                             LABEL_ROW_HEIGHT + y * DATA_ROW_HEIGHT + (DATA_ROW_HEIGHT - height) / 2);
                     }
                 }
-
-
             }
 
 
