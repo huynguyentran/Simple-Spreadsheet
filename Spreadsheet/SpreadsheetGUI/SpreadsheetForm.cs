@@ -492,7 +492,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private void discoModeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //If disco mode is not enabled. 
+            //If disco mode is not enable. 
             if (!discoModeEnabled)
             {
                 //We enable the disco
@@ -508,23 +508,30 @@ namespace SpreadsheetGUI
             //If disco mode is enabled.
             else
             {
-                //We shuts down the dance floor.
+                // We re-enabled the content box and turn off the dance floor.
                 cellContentBox.Enabled = true;
-                //TurnOffDisco();
+                TurnOffDisco();
 
-
-                //Comment out unncessary method.
+                //Commented out unncessary method 
                 //discoWorker_RunWorkerCompleted();
                 spreadSheetPanel.ClearHighlights();
                 displaySelection(spreadSheetPanel);
             }
         }
 
+
+        /// <summary>
+        /// Stop the disco. 
+        /// </summary>
         private void TurnOffDisco()
         {
+            //If disco mode is enable. 
             if (discoModeEnabled)
             {
+                // Then we disable it.
                 discoModeEnabled = false;
+
+                //Abort and wait for the thread to finish. 
                 discoThread.Abort();
                 discoThread.Join();
                 Console.WriteLine("Disco effects removed");
@@ -532,17 +539,17 @@ namespace SpreadsheetGUI
         }
 
         /// <summary>
-        /// A private method to get a random color for a cell. 
+        /// Creates a disctionary that conatains cells as key and color as value to generate color for different cells.
         /// </summary>
-        /// <param name="rnd">A random element for the color</param>
-        /// <returns>A dictionary with cell as key and color as value</returns>
+        /// <param name="rnd">Random elemenst</param>
+        /// <returns>A dictionary with cell and color</returns>
         private Dictionary<(int, int), Color> colorChange(Random rnd)
         {
             Color[] discoColors = new Color[] { Color.Red, Color.Cyan, Color.Orange, Color.Lime, Color.Magenta };
 
             Dictionary<(int, int), Color> cellColors = new Dictionary<(int, int), Color>();
 
-            //Loops through every visible cells. 
+            //Loop through the entire spreadsheet. 
             for (int col = 0; col < spreadSheetPanel.NumCols; col++)
             {
                 for (int row = 0; row < spreadSheetPanel.NumRows; row++)
@@ -554,7 +561,7 @@ namespace SpreadsheetGUI
         }
 
         /// <summary>
-        /// Changing the color of the cells constantly while disco mode is enabled. 
+        /// Channging the color of the cells in intervals. 
         /// </summary>
         private void discoWorker_DoWork()
         {
@@ -595,7 +602,6 @@ namespace SpreadsheetGUI
             }
         }
 
-        //
         //private void discoWorker_RunWorkerCompleted()
         //{
         //    spreadSheetPanel.ClearHighlights();
