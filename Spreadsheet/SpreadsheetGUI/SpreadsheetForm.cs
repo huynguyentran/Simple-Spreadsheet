@@ -31,6 +31,7 @@ namespace SpreadsheetGUI
 
         private bool discoModeEnabled;
 
+
         /// <summary>
         /// Creates a basic empty spreadsheet.
         /// </summary>
@@ -335,6 +336,12 @@ namespace SpreadsheetGUI
         private void SpreadsheetForm_FormClosing(object sender, FormClosingEventArgs e)
         {
 
+            if (discoWorker.IsBusy)
+            {
+             //  discoWorker.CancelAsync();
+                discoModeEnabled = false;
+              //  DialogResult result = MessageBox.Show("Closing the dance floor.", "DiscoMode", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
          
             if (CloseDialogBox() == false)
             {
@@ -461,8 +468,8 @@ namespace SpreadsheetGUI
             }
             else
             {
-                discoWorker.CancelAsync();
-               // discoModeEnabled = false;
+               // discoWorker.CancelAsync();
+                discoModeEnabled = false;
             }
         }
 
@@ -491,7 +498,7 @@ namespace SpreadsheetGUI
 
             Dictionary<(int, int), Color> cellColors = (Dictionary<(int, int), Color>)e.Argument;
 
-            while(!discoWorker.CancellationPending)
+            while(discoModeEnabled && !discoWorker.CancellationPending)
             {
                 foreach(KeyValuePair<(int, int), Color> cellData in cellColors)
                 {
@@ -505,6 +512,7 @@ namespace SpreadsheetGUI
                     Invoke(new MethodInvoker(() => spreadSheetPanel.Highlight(cellData.Key.Item1, cellData.Key.Item2, interpolation)));
                 }
 
+                
                 Invoke(new MethodInvoker(() => displaySelection(spreadSheetPanel)));
                 Random rnd = new Random();
 
