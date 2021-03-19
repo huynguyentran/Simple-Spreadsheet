@@ -257,8 +257,8 @@ namespace SS
         {
             Color intermediate = Color.FromArgb(
                 Interpolate(start.R, finish.R, progress),
-                Interpolate(start.B, finish.B, progress),
-                Interpolate(start.G, finish.G, progress));
+                Interpolate(start.G, finish.G, progress),
+                Interpolate(start.B, finish.B, progress));
 
             return intermediate;
         }
