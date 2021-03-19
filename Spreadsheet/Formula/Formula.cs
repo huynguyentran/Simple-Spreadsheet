@@ -130,16 +130,15 @@ namespace SpreadsheetUtilities
                 if (formulaElements.Count == 0)
                 {
                     isValidFollow = current.CanStart();
-                    errorMessage = "A " + current + " of type " + current.GetType() + 
-                        " cannot start a formula. Is a value missing at the beginning?";
+                    errorMessage = "A " + current + " cannot start a formula. Is a value missing at the beginning?";
                 }
                 else
                 {
                     FormulaElement last = formulaElements.Last.Value;
 
                     isValidFollow = last.CanFollow(current);
-                    errorMessage = "A " + current + " of type " + current.GetType() +
-                        " cannot follow a " + last + " of type " + last.GetType() +". Is an operator missing an operand, or is there a value without an operator?";
+                    errorMessage = "A " + current + 
+                        " cannot follow a " + last + ". Is an operator missing an operand, or is there a value without an operator?";
                 }
 
                 //If everything checks out, the token can be added to the formula.
@@ -161,7 +160,7 @@ namespace SpreadsheetUtilities
             FormulaElement finish = formulaElements.Last.Value;
 
             if (!finish.CanEnd())
-                throw new FormulaFormatException("The formula element " + finish + " of type " + finish.GetType() + " cannot finish a formula.");
+                throw new FormulaFormatException("The formula element " + finish + " cannot finish a formula.");
         }
 
         /// <param name="token">The token to identify (it will take the normalized form once the method is done).</param>

@@ -110,7 +110,6 @@ namespace SS
         /// <summary>
         /// Clears the display.
         /// </summary>
-
         public void Clear()
         {
             drawingPanel.Clear();
@@ -161,11 +160,17 @@ namespace SS
             return drawingPanel.SetSelection(col, row);
         }
 
+        /// <summary>
+        /// Highlight a cells by drawing a box of a specified color.
+        /// </summary>
         public void Highlight(int col, int row, Color color)
         {
             drawingPanel.highlight(col, row, color);
         }
 
+        /// <summary>
+        /// Clears all the highlights from the display.
+        /// </summary>
         public void ClearHighlights()
         {
             drawingPanel.ClearHighlights();
@@ -242,17 +247,28 @@ namespace SS
 
 
         /// <summary>
-        /// 
+        /// Finds a float a certain distance between a starting float and an ending float.
+        /// This is used to create "smooth" animations between colors.
+        /// Inspired by Unity's Interpolation.
         /// </summary>
         /// <param name="start">Initial float.</param>
         /// <param name="finish">Ending float.</param>
         /// <param name="progress">Number between 0 and 1 to interpolate between the start and finish.</param>
-        /// <returns></returns>
+        /// <returns>The interpolated float.</returns>
         public static int Interpolate(int start, int finish, float progress)
         {
-            return start + (int)((finish - start) * progress);
+            return start + (int)(finish - start * Math.Min(progress, 1));
         }
 
+        /// <summary>
+        /// Finds a color a certain distance between a starting color and an ending color.
+        /// This is used to create "smooth" animations between colors.
+        /// Inspired by Unity's Interpolation.
+        /// </summary>
+        /// <param name="start">Initial float.</param>
+        /// <param name="finish">Ending float.</param>
+        /// <param name="progress">Number between 0 and 1 to interpolate between the start and finish.</param>
+        /// <returns>The interpolated Color.</returns>
         public static Color InterpolateColor(Color start, Color finish, float progress)
         {
             Color intermediate = Color.FromArgb(
