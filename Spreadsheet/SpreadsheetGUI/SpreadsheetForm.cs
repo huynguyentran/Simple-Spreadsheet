@@ -70,12 +70,11 @@ namespace SpreadsheetGUI
         /// Creates a spreadsheet from a file.
         /// </summary>
         /// <param name="filename">The file to generate the spreadsheet from.</param>
-        public SpreadsheetForm(string filename)
+        public void SpreadsheetFormOpenFromFile(string filename)
         {
-            InitializeComponent();
 
             //Making sure that everytime we open a new form, disco mode has been disabled. 
-            discoModeEnabled = false;
+            TurnOffDisco();
 
             saveContentQueue = new Queue<Tuple<string, string, bool>>();
 
@@ -247,7 +246,7 @@ namespace SpreadsheetGUI
                 int row, col;
                 spreadSheetPanel.GetSelection(out col, out row);
                 string cellName = GetNameOfCell(col, row);
-                //SaveContents(cellName, cellContentBox.Text);
+                //Condtions when moving with key arrows. 
                 switch (keyData)
                 {
                     case Keys.Up:
@@ -278,7 +277,6 @@ namespace SpreadsheetGUI
         private void newSpreadsheetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm());
-            // Thread thread = new Thread(Application.Run(new SpreadsheetForm()));
         }
 
         /// <summary>
@@ -347,12 +345,16 @@ namespace SpreadsheetGUI
         /// </summary>
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFile = new OpenFileDialog();
-            openFile.Filter = "Spreadsheet|*.sprd|All File|*";
-            openFile.Title = "Open your spreadsheet";
-            DialogResult result = openFile.ShowDialog();
-            if (result == DialogResult.OK)
-                SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm(openFile.FileName));
+            bool saveResult = CloseDialogBox();
+            if (saveResult)
+            {
+                OpenFileDialog openFile = new OpenFileDialog();
+                openFile.Filter = "Spreadsheet|*.sprd|All File|*";
+                openFile.Title = "Open your spreadsheet";
+                DialogResult result = openFile.ShowDialog();
+                if (result == DialogResult.OK)
+                    SpreadsheetFormOpenFromFile(openFile.FileName);
+            }
         }
 
         /// <summary>
@@ -497,7 +499,7 @@ namespace SpreadsheetGUI
         private void clearHighlightsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             spreadSheetPanel.ClearHighlights();
-            displaySelection(spreadSheetPanel);
+            displaySelection(spreadSheetPanel, false);
         }
 
         /// <summary>
@@ -526,10 +528,7 @@ namespace SpreadsheetGUI
                 // We re-enabled the content box and turn off the dance floor.
                 cellContentBox.Enabled = true;
                 TurnOffDisco();
-
-
-                spreadSheetPanel.ClearHighlights();
-                displaySelection(spreadSheetPanel);
+      
             }
         }
 
@@ -548,7 +547,17 @@ namespace SpreadsheetGUI
                 //Abort and wait for the thread to finish. 
                 discoThread.Abort();
                 discoThread.Join();
-                Console.WriteLine("Disco effects removed");
+                spreadSheetPanel.ClearHighlights();
+                displaySelection(spreadSheetPanel, false);
+
+            }
+        }
+
+        private void DiscoHighlight(int col, int row, Color color)
+        {
+            if (discoModeEnabled)
+            {
+                spreadSheetPanel.Highlight(col, row, color);
             }
         }
 
@@ -559,7 +568,7 @@ namespace SpreadsheetGUI
         /// <returns>A dictionary with cell and color</returns>
         private Dictionary<(int, int), Color> colorChange(Random rnd)
         {
-            Color[] discoColors = new Color[] { Color.Red, Color.Cyan, Color.Orange, Color.Lime, Color.Magenta };
+            Color[] discoColors = new Color[] { Color.DarkRed, Color.DarkCyan, Color.DarkOrange, Color.DarkGreen, Color.DarkMagenta };
 
             Dictionary<(int, int), Color> cellColors = new Dictionary<(int, int), Color>();
 
@@ -580,8 +589,8 @@ namespace SpreadsheetGUI
         private void discoWorker_DoWork()
         {
             float time = 0;
-            float timeToAnimate = 0.5f;
-            int deltaTime = 100;
+            float timeToAnimate = 1f;
+            int deltaTime = 250;
 
             Random rnd = new Random();
             Dictionary<(int, int), Color> cellColors = colorChange(rnd);
@@ -600,7 +609,7 @@ namespace SpreadsheetGUI
                         interpolation = SpreadsheetPanel.InterpolateColor(Color.Black, nextColors[cellData.Key], (time - timeToAnimate) / timeToAnimate);
 
 
-                    Invoke(new MethodInvoker(() => spreadSheetPanel.Highlight(cellData.Key.Item1, cellData.Key.Item2, interpolation)));
+                    Invoke(new MethodInvoker(() => DiscoHighlight(cellData.Key.Item1, cellData.Key.Item2, interpolation)));
 
                 }
 
@@ -617,11 +626,17 @@ namespace SpreadsheetGUI
             }
         }
 
+        /// <summary>
+        /// A message box to help the user with highlight feature
+        /// </summary>
         private void highlightsDependentsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DialogResult helpMenu = MessageBox.Show("To show the depedents of a cell, select a cell then go to Features -> Highlight Dependents. This will color the cell and its dependents. \nTo clear all highlights, go to Features -> Clear All Highlights  \n \nNote: If the cell does not have any dependents, the feature will highlight that cell only.", "Highlighting depdendents.", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        /// <summary>
+        /// A message box to help the user with the disco feature.
+        /// </summary>
         private void discoModeToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             DialogResult helpMenu = MessageBox.Show("To enable the dance floor, go to Features -> Toggle Disco Mode. \nTo shut down the party, press Toggle Disco Mode again.", "Disco Mode", MessageBoxButtons.OK, MessageBoxIcon.Information);
